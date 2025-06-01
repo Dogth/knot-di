@@ -18,7 +18,6 @@
           inherit system;
         };
       in
-
       with pkgs;
       {
         checks = inputs.pre-commits.lib.${system}.run {
@@ -63,6 +62,7 @@
               # Development tools
               cppcheck
               clang-tools
+              ninja
 
               # Misc
               doxygen

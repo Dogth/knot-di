@@ -32,12 +32,17 @@
               ];
             };
 
-            cmake-format.enable = true;
-
             # Spelling and grammar checks
             typos = {
               enable = true;
+              settings.configuration = '''';
               settings.exclude = "*.nix";
+              settings.ignored-words = [
+                "NixOS"
+                "Nixpkgs"
+                "Knot-DI"
+                "restat"
+              ];
             };
 
             # Commit checker

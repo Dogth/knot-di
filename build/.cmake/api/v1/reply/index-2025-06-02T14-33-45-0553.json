@@ -1,0 +1,28 @@
+{
+	"cmake" : 
+	{
+		"generator" : 
+		{
+			"multiConfig" : false,
+			"name" : "Ninja"
+		},
+		"paths" : 
+		{
+			"cmake" : "/nix/store/446sv4sjjz03j7zw44icjbd81mfl8inx-cmake-3.31.6/bin/cmake",
+			"cpack" : "/nix/store/446sv4sjjz03j7zw44icjbd81mfl8inx-cmake-3.31.6/bin/cpack",
+			"ctest" : "/nix/store/446sv4sjjz03j7zw44icjbd81mfl8inx-cmake-3.31.6/bin/ctest",
+			"root" : "/nix/store/446sv4sjjz03j7zw44icjbd81mfl8inx-cmake-3.31.6/share/cmake-3.31"
+		},
+		"version" : 
+		{
+			"isDirty" : false,
+			"major" : 3,
+			"minor" : 31,
+			"patch" : 6,
+			"string" : "3.31.6",
+			"suffix" : ""
+		}
+	},
+	"objects" : [],
+	"reply" : {}
+}

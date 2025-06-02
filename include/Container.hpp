@@ -1,6 +1,10 @@
 #ifndef CONTAINER_HPP
 #define CONTAINER_HPP
 
+// TODO: placement new
+// TODO: error handling
+//
+
 #include "Descriptor.hpp"
 #include "IFactory.hpp"
 #include "TypeComparator.hpp"
@@ -10,7 +14,7 @@
 #define TEMPLATE_ARGS_0
 #define FUNC_ARGS_0
 #define FACTORY_TYPES_0
-#define FACTORY_ARG
+#define FACTORY_ARGS_0
 
 // Unary
 #define TEMPLATE_ARGS_1 , typename A1
@@ -19,9 +23,9 @@
 #define FACTORY_ARGS_1 arg1
 
 // Binary
-#define TEMPLATE_ARGS_2 , typename A1, typename A2
-#define FUNC_ARGS_2 , A1 arg1, A2 arg2
-#define FACTORY_TYPES_2 , A1, A2
+#define TEMPLATE_ARGS_2 typename A1, typename A2
+#define FUNC_ARGS_2 A1 arg1, A2 arg2
+#define FACTORY_TYPES_2 A1, A2
 #define FACTORY_ARGS_2 arg1, arg2
 
 // Macro for registering services
@@ -62,7 +66,9 @@ public:
   }
 
   // TODO: #define KNOT_PARAMS_MAX registration limit
+  // WARN: Must be mover outside and controlled properly
   REGISTER_SERVICE_GEN(1);
+  REGISTER_SERVICE_GEN(0);
 
   template <typename T> T *resolve() {
     Registry::iterator it = _registry.find(&typeid(T));

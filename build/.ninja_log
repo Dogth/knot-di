@@ -1,0 +1,5 @@
+# ninja log v6
+715	793	1748874756059512549	tests/knot-di-tests	4eade62c678c514
+9	715	1748874755354280898	tests/CMakeFiles/knot-di-tests.dir/test_main.cpp.o	1caede98a9d8a577
+9	605	1748874827121358210	tests/CMakeFiles/knot-di-tests.dir/test_main.cpp.o	1caede98a9d8a577
+606	670	1748874827717623417	tests/knot-di-tests	4eade62c678c514

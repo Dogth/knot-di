@@ -4,88 +4,115 @@
 #include "ContainerMacros.hpp"
 #include "Descriptor.hpp"
 #include "IFactory.hpp"
-#include "StaticMap.hpp"
-#include <typeinfo>
+#include "Util.hpp"
+#include <cstddef>
+
+#ifndef KNOT_MAX_SERVICES
+#define KNOT_MAX_SERVICES 16
+#endif
+
+#ifndef KNOT_MAX_TRANSIENTS
+#define KNOT_MAX_TRANSIENTS 32
+#endif
 
 // Container class for managing service registrations and resolutions
 namespace Knot {
-
+// TODO: update macros to use placement new
 FACTORY_GEN // PERF: vtable lookups, but idk how to avoid them here
             // PERF: plus like separate class for each arity :/
+            //
     template <typename T>
     class Factory : public IFactory {
 public:
-  virtual void *create() override { return new T(); }
-  virtual void deleteInstance(void *instance) override {
-    delete static_cast<T *>(instance);
+  void *create(void *buffer) { return buffer ? new (buffer) T() : new T(); }
+  void destroy(void *instance) {
+    if (instance)
+      static_cast<T *>(instance)->~T();
   }
 };
 
 class Container {
 private:
-#ifdef KNOT_SIZE
-  typedef knot::static_map<const std::type_info *, Descriptor *, KNOT_SIZE>
-      Registry;
-#else
-  typedef StaticMap<const std::type_info *, Descriptor *, 16> Registry;
-#endif
-  Registry _registry;
+  Container(const Container &);
+  Container &operator=(const Container &);
 
-  static Container *_instancePtr;
+  RegistryEntry _registry[KNOT_MAX_SERVICES];
+  size_t _count;
 
-  Container() = default;                            // no-args constructor
-  Container(const Container &) = delete;            // uncopyable
-  Container &operator=(const Container &) = delete; // unmovable
+  TransientInfo _transients[KNOT_MAX_TRANSIENTS];
+  size_t _transient_count;
+
+  template <typename T> static void *_singleton_storage() {
+    static union {
+      char data[sizeof(T)];
+      long double align;
+    } storage;
+    return &storage;
+  }
+
+  RegistryEntry *find_entry(void *tid) {
+    for (size_t i = 0; i < _count; ++i)
+      if (_registry[i].type_id == tid)
+        return &_registry[i];
+    return 0;
+  }
 
 public:
-  template <typename T> void registerService(Strategy strategy) {
-    if (_registry.find(&typeid(T))) {
-      return; // already registered
-    }
-    _registry.insert(&typeid(T), new Descriptor(new Factory<T>(), strategy));
+  Container() : _count(0) {}
+
+  // Core function for generation. Arity is set by X-macros
+  template <typename T> bool registerService(Strategy strategy) {
+    if (_count >= KNOT_MAX_SERVICES)
+      return false;
+    void *tid = TypeId<T>();
+    if (find_entry(tid))
+      return false;
+
+    RegistryEntry &entry = _registry[_count++];
+    entry.type_id = tid;
+    entry.desc.factory = new Factory<T>;
+    entry.desc.storage = (strategy == SINGLETON) ? _singleton_storage<T>() : 0;
+    entry.desc.strategy = strategy;
+    return true;
   }
 
-  // All .registerService declarations are preprocessed by macros
-  // Need to use '--ffunction-sections -fdata-sections' with compiler
-  // and '-Wl --gc-sections' for linker
-  REGISTER_GEN
-
-  static Container &instance() {
-    static Container instance;
-    return instance;
-  }
-
-  // FIXME: gets optimized out by compiler
-  /*
-          static Container &instance() {
-      if (!_instancePtr) {
-        _instancePtr = new Container();
-      }
-      return *_instancePtr;
-    }
-  */
-
-  ~Container() {
-    for (Registry::size_type i = 0; i < _registry.size(); ++i) {
-      _registry.begin()[i].second->factory->deleteInstance(
-          _registry.begin()[i].second->instance);
-    }
-  }
-
-  // TODO: bless this mess
   template <typename T> T *resolve() {
-    Descriptor **entry = _registry.find(&typeid(T));
-    if (!entry) {
-      return nullptr;
-    }
-
-    if ((*entry)->strategy == Strategy::SINGLETON) {
-      if (!(*entry)->instance) {
-        (*entry)->instance = (*entry)->factory->create();
-      }
-      return static_cast<T *>((*entry)->instance);
+    RegistryEntry *entry = find_entry(TypeId<T>());
+    if (!entry)
+      return 0;
+    Descriptor &desc = entry->desc;
+    if (desc.strategy == SINGLETON) {
+      if (!desc.instance)
+        desc.instance = desc.factory->create(desc.storage);
+      return static_cast<T *>(desc.instance);
     } else {
-      return static_cast<T *>((*entry)->factory->create());
+      if (_transient_count >= KNOT_MAX_TRANSIENTS)
+        return 0;
+      T *ptr = static_cast<T *>(desc.factory->create(0));
+      _transients[_transient_count].ptr = ptr;
+      _transients[_transient_count].factory = desc.factory;
+      ++_transient_count;
+      return ptr;
+    }
+  }
+
+  void destroyAllTransients() {
+    for (size_t i = 0; i < _transient_count; ++i) {
+      _transients[i].factory->destroy(_transients[i].ptr);
+      _transients[i].ptr = 0;
+    }
+    _transient_count = 0;
+  }
+
+  template <typename T> void destroyTransient(T *ptr) {
+    for (size_t i = 0; i < _transient_count; ++i) {
+      if (_transients[i].ptr == ptr) {
+        _transients[i].factory->destroy(ptr);
+        for (size_t j = i + 1; j < _transient_count; ++j)
+          _transients[j - 1] = _transients[j];
+        --_transient_count;
+        return;
+      }
     }
   }
 };

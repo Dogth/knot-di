@@ -5,8 +5,8 @@ namespace Knot {
 class IFactory {
 public:
   virtual ~IFactory() {};
-  virtual void *create() = 0;
-  virtual void deleteInstance(void *instance) = 0;
+  virtual void *create(void *buffer) = 0;
+  virtual void destroy(void *instance) = 0;
 };
 }; // namespace Knot
 

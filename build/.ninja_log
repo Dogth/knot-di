@@ -1,5 +1,9 @@
 # ninja log v6
-586	650	1749021763134504873	tests/knot-di-tests	4eade62c678c514
-8	586	1749021762556580098	tests/CMakeFiles/knot-di-tests.dir/test_main.cpp.o	1caede98a9d8a577
-18	513	1749022304419864154	benchmarks/CMakeFiles/knot-di-benchmarks.dir/benchmark_main.cpp.o	55c6a9765c7fb76
-513	594	1749022304914211663	benchmarks/knot-di-benchmarks	4f9b638ae54861c8
+395	462	1749040445618619406	benchmarks/knot-di-benchmarks	4f9b638ae54861c8
+9	645	1749040345776408169	tests/CMakeFiles/knot-di-tests.dir/test_main.cpp.o	1caede98a9d8a577
+9	394	1749040445233584255	benchmarks/CMakeFiles/knot-di-benchmarks.dir/benchmark_main.cpp.o	55c6a9765c7fb76
+645	727	1749040346412619321	tests/knot-di-tests	4eade62c678c514
+10	410	1749041503747433730	benchmarks/CMakeFiles/knot-di-benchmarks.dir/benchmark_main.cpp.o	55c6a9765c7fb76
+410	480	1749041504147650330	benchmarks/knot-di-benchmarks	4f9b638ae54861c8
+9	581	1749041503746944021	tests/CMakeFiles/knot-di-tests.dir/test_main.cpp.o	1caede98a9d8a577
+581	645	1749041504318794443	tests/knot-di-tests	4eade62c678c514

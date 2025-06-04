@@ -1,8 +1,8 @@
 find_package(benchmark REQUIRED)
+include_directories(${benchmark_INCLUDE_DIRS})
 
 add_executable(knot-di-benchmarks
     benchmark_main.cpp
-    # Add more benchmark source files here
 )
 
 target_link_libraries(knot-di-benchmarks

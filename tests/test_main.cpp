@@ -1,6 +1,8 @@
 #include "../include/Container.hpp"
 #include <gtest/gtest.h>
 
+// TODO: refactor
+// TODO: add more tests
 using namespace Knot;
 
 struct IService {
@@ -29,10 +31,10 @@ struct ServiceImplWithArg : IService {
 
 TEST(ContainerTest, RegisterAndResolveSingleton) {
   auto &container = Container::instance();
-  container.registerService<IService, ServiceImpl>(Strategy::SINGLETON);
+  container.registerService<ServiceImpl>(Strategy::SINGLETON);
 
-  IService *service1 = container.resolve<IService>();
-  IService *service2 = container.resolve<IService>();
+  ServiceImpl *service1 = container.resolve<ServiceImpl>();
+  ServiceImpl *service2 = container.resolve<ServiceImpl>();
 
   ASSERT_NE(service1, nullptr);
   ASSERT_EQ(service1, service2);
@@ -41,10 +43,10 @@ TEST(ContainerTest, RegisterAndResolveSingleton) {
 
 TEST(ContainerTest, RegisterAndResolveTransient) {
   auto &container = Container::instance();
-  container.registerService<TService, TServiceImpl>(Strategy::TRANSIENT);
+  container.registerService<TServiceImpl>(Strategy::TRANSIENT);
 
-  TService *service1 = container.resolve<TService>();
-  TService *service2 = container.resolve<TService>();
+  TServiceImpl *service1 = container.resolve<TServiceImpl>();
+  TServiceImpl *service2 = container.resolve<TServiceImpl>();
 
   ASSERT_NE(service1, nullptr);
   ASSERT_NE(service2, nullptr);
@@ -57,8 +59,8 @@ TEST(ContainerTest, RegisterAndResolveTransient) {
 }
 
 TEST(ContainerTest, RegisterWithArgAndResolve) {
-  auto &container = Container::instance();
-  container.registerService<ServiceImplWithArg, int>(Strategy::SINGLETON, 99);
+  Container &container = Container::instance();
+  container.registerService<ServiceImplWithArg>(Strategy::SINGLETON, 99);
 
   ServiceImplWithArg *service = container.resolve<ServiceImplWithArg>();
   ASSERT_NE(service, nullptr);
@@ -66,6 +68,8 @@ TEST(ContainerTest, RegisterWithArgAndResolve) {
 }
 
 int main(int argc, char **argv) {
+
+  Container &container = Container::instance();
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -13,3 +13,11 @@
 /Users/dogth/Repos/knot-di/build/tests/CMakeFiles/install.dir
 /Users/dogth/Repos/knot-di/build/tests/CMakeFiles/install/local.dir
 /Users/dogth/Repos/knot-di/build/tests/CMakeFiles/install/strip.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/knot-di-benchmarks.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/test.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/edit_cache.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/rebuild_cache.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/list_install_components.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/install.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/install/local.dir
+/Users/dogth/Repos/knot-di/build/benchmarks/CMakeFiles/install/strip.dir

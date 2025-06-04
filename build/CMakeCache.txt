@@ -131,7 +131,7 @@ CMAKE_OSX_DEPLOYMENT_TARGET:STRING=11.3
 CMAKE_OSX_SYSROOT:PATH=/nix/store/w41ks2baj649algkjnbh9746cprrnr1k-apple-sdk-11.3/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
 
 //Value Computed by CMake
-CMAKE_PROJECT_DESCRIPTION:STATIC=Knot Dependency Injection Framework
+CMAKE_PROJECT_DESCRIPTION:STATIC=Knot Dependency Injection library for C++ adhering to C++03 standard
 
 //Value Computed by CMake
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
@@ -218,6 +218,29 @@ CMAKE_TAPI:FILEPATH=/Library/Developer/CommandLineTools/usr/bin/tapi
 // during the make.  This is useful for debugging only. With Visual
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
+
+//Directory under which to collect all populated content
+FETCHCONTENT_BASE_DIR:PATH=/Users/dogth/Repos/knot-di/build/_deps
+
+//Disables all attempts to download or update content and assumes
+// source dirs already exist
+FETCHCONTENT_FULLY_DISCONNECTED:BOOL=OFF
+
+//Enables QUIET option for all content population
+FETCHCONTENT_QUIET:BOOL=ON
+
+//When not empty, overrides where to find pre-populated content
+// for googlebenchmark
+FETCHCONTENT_SOURCE_DIR_GOOGLEBENCHMARK:PATH=
+
+//Enables UPDATE_DISCONNECTED behavior for all content population
+FETCHCONTENT_UPDATES_DISCONNECTED:BOOL=OFF
+
+//Enables UPDATE_DISCONNECTED behavior just for population of googlebenchmark
+FETCHCONTENT_UPDATES_DISCONNECTED_GOOGLEBENCHMARK:BOOL=OFF
+
+//Git command line client
+GIT_EXECUTABLE:FILEPATH=/nix/store/9pa6rygnkrdp03j4ba0w6yb5qid5x3qb-git-2.49.0/bin/git
 
 //The directory containing a CMake configuration file for GTest.
 GTest_DIR:PATH=/nix/store/vin9v6pn9qirqajcynj09zn6zhqmaagj-gtest-1.16.0-dev/lib/cmake/GTest
@@ -327,7 +350,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=2
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=3
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -376,4 +399,6 @@ CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
 FIND_PACKAGE_MESSAGE_DETAILS_GTest:INTERNAL=[/nix/store/vin9v6pn9qirqajcynj09zn6zhqmaagj-gtest-1.16.0-dev/lib/cmake/GTest/GTestConfig.cmake][c ][v1.16.0()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//ADVANCED property for variable: GIT_EXECUTABLE
+GIT_EXECUTABLE-ADVANCED:INTERNAL=1
 

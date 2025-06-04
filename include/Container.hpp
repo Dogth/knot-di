@@ -1,99 +1,91 @@
 #ifndef CONTAINER_HPP
 #define CONTAINER_HPP
 
-// TODO: placement new
-// TODO: error handling
-//
-
+#include "ContainerMacros.hpp"
 #include "Descriptor.hpp"
 #include "IFactory.hpp"
-#include "TypeComparator.hpp"
-#include <map>
-
-// Nullary
-#define TEMPLATE_ARGS_0
-#define FUNC_ARGS_0
-#define FACTORY_TYPES_0
-#define FACTORY_ARGS_0
-
-// Unary
-#define TEMPLATE_ARGS_1 , typename A1
-#define FUNC_ARGS_1 , A1 arg1
-#define FACTORY_TYPES_1 , A1
-#define FACTORY_ARGS_1 arg1
-
-// Binary
-#define TEMPLATE_ARGS_2 typename A1, typename A2
-#define FUNC_ARGS_2 A1 arg1, A2 arg2
-#define FACTORY_TYPES_2 A1, A2
-#define FACTORY_ARGS_2 arg1, arg2
-
-// Macro for registering services
-#define REGISTER_SERVICE_GEN(N)                                                \
-  template <typename IT, typename T TEMPLATE_ARGS_##N>                         \
-  void registerService(Strategy strategy FUNC_ARGS_##N) {                      \
-    if (_registry.count(&typeid(IT))) {                                        \
-      return;                                                                  \
-    }                                                                          \
-    _registry[&typeid(IT)] = new Descriptor(                                   \
-        new Factory##N<T FACTORY_TYPES_##N>(FACTORY_ARGS_##N), strategy);      \
-  }
+#include "StaticMap.hpp"
+#include <typeinfo>
 
 // Container class for managing service registrations and resolutions
 namespace Knot {
+
+FACTORY_GEN // PERF: vtable lookups, but idk how to avoid them here
+            // PERF: plus like separate class for each arity :/
+    template <typename T>
+    class Factory : public IFactory {
+public:
+  virtual void *create() override { return new T(); }
+  virtual void deleteInstance(void *instance) override {
+    delete static_cast<T *>(instance);
+  }
+};
+
 class Container {
 private:
-  typedef std::map<const std::type_info *, Descriptor *, TypeComparator>
+#ifdef KNOT_SIZE
+  typedef knot::static_map<const std::type_info *, Descriptor *, KNOT_SIZE>
       Registry;
+#else
+  typedef StaticMap<const std::type_info *, Descriptor *, 16> Registry;
+#endif
   Registry _registry;
 
-  Container() = default;
-  Container(const Container &) = delete;
-  Container &operator=(const Container &) = delete;
+  static Container *_instancePtr;
+
+  Container() = default;                            // no-args constructor
+  Container(const Container &) = delete;            // uncopyable
+  Container &operator=(const Container &) = delete; // unmovable
 
 public:
+  template <typename T> void registerService(Strategy strategy) {
+    if (_registry.find(&typeid(T))) {
+      return; // already registered
+    }
+    _registry.insert(&typeid(T), new Descriptor(new Factory<T>(), strategy));
+  }
+
+  // All .registerService declarations are preprocessed by macros
+  // Need to use '--ffunction-sections -fdata-sections' with compiler
+  // and '-Wl --gc-sections' for linker
+  REGISTER_GEN
+
   static Container &instance() {
     static Container instance;
     return instance;
   }
 
-  ~Container() {
-    for (Registry::iterator it = _registry.begin(); it != _registry.end();
-         ++it) {
-      delete it->second;
+  // FIXME: gets optimized out by compiler
+  /*
+          static Container &instance() {
+      if (!_instancePtr) {
+        _instancePtr = new Container();
+      }
+      return *_instancePtr;
     }
-    _registry.clear();
+  */
+
+  ~Container() {
+    for (Registry::size_type i = 0; i < _registry.size(); ++i) {
+      _registry.begin()[i].second->factory->deleteInstance(
+          _registry.begin()[i].second->instance);
+    }
   }
 
-  // TODO: #define KNOT_PARAMS_MAX registration limit
-  // WARN: Must be mover outside and controlled properly
-  REGISTER_SERVICE_GEN(1);
-  REGISTER_SERVICE_GEN(0);
-
+  // TODO: bless this mess
   template <typename T> T *resolve() {
-    Registry::iterator it = _registry.find(&typeid(T));
-    if (it == _registry.end()) {
-      // FIXME: error handling
-      return 0;
-    };
+    Descriptor **entry = _registry.find(&typeid(T));
+    if (!entry) {
+      return nullptr;
+    }
 
-    Descriptor *entry = it->second;
-    if (entry->strategy == Strategy::SINGLETON) {
-      if (!entry->instance) {
-        entry->instance = entry->factory->create();
-        if (!entry->instance) {
-          // FIXME: error handling
-          return 0;
-        }
+    if ((*entry)->strategy == Strategy::SINGLETON) {
+      if (!(*entry)->instance) {
+        (*entry)->instance = (*entry)->factory->create();
       }
-      return static_cast<T *>(entry->instance);
+      return static_cast<T *>((*entry)->instance);
     } else {
-      void *newInstance = entry->factory->create();
-      if (!newInstance) {
-        // FIXME: error handling
-        return 0;
-      }
-      return static_cast<T *>(newInstance);
+      return static_cast<T *>((*entry)->factory->create());
     }
   }
 };

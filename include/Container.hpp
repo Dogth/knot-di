@@ -67,12 +67,17 @@ public:
     void *tid = TypeId<T>();
     if (find_entry(tid))
       return false;
-
     RegistryEntry &entry = _registry[_count++];
     entry.type_id = tid;
-    entry.desc.factory = new Factory<T>;
-    entry.desc.storage = (strategy == SINGLETON) ? _singleton_storage<T>() : 0;
+    entry.desc.factory = new Factory<T>();
     entry.desc.strategy = strategy;
+    entry.desc.storage = (strategy == SINGLETON) ? _singleton_storage<T>() : 0;
+    entry.desc.instance = 0;
+    if (strategy == TRANSIENT) {
+      _transients[_transient_count].ptr = entry.desc.factory->create(0);
+      _transients[_transient_count].factory = entry.desc.factory;
+      ++_transient_count;
+    }
     return true;
   }
 

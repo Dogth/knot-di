@@ -31,7 +31,7 @@ struct ServiceImplWithArg : IService {
 
 TEST(ContainerTest, RegisterAndResolveSingleton) {
   Container container;
-  container.registerService<ServiceImpl>(Strategy::SINGLETON);
+  container.registerService<ServiceImpl>(SINGLETON);
 
   ServiceImpl *service1 = container.resolve<ServiceImpl>();
   ServiceImpl *service2 = container.resolve<ServiceImpl>();
@@ -43,7 +43,7 @@ TEST(ContainerTest, RegisterAndResolveSingleton) {
 
 TEST(ContainerTest, RegisterAndResolveTransient) {
   Container container;
-  container.registerService<TServiceImpl>(Strategy::TRANSIENT);
+  container.registerService<TServiceImpl>(TRANSIENT);
 
   TServiceImpl *service1 = container.resolve<TServiceImpl>();
   TServiceImpl *service2 = container.resolve<TServiceImpl>();

@@ -51,14 +51,12 @@ private:
   }
 
   RegistryEntry *find_entry(void *tid) {
-    KNOT_INFO("Looking for service with ID: {} s[{}/{}]", tid, _count,
-              KNOT_MAX_SERVICES);
+		KNOT_INFO("Looking for service with ID: {}",tid);
     for (size_t i = 0; i < _count; ++i)
       if (_registry[i].type_id == tid) {
-        KNOT_INFO("Found service with ID: {}", tid);
+				KNOT_INFO("Found service with ID: {}", tid);
         return &_registry[i];
-      } else
-        KNOT_WARN("Service with ID {} not found", tid);
+			} else KNOT_WARN("Service with ID {} not found", tid);
     return 0;
   }
 
@@ -68,81 +66,60 @@ public:
   // Core function for generation. Arity is set by X-macros
   template <typename T> bool registerService(Strategy strategy) {
     void *tid = TypeId<T>();
-    KNOT_INFO("Registering service with ID: {}", tid);
+		KNOT_INFO("Registering service with ID: {}", tid);
     if (_count >= KNOT_MAX_SERVICES) {
-      KNOT_WARN("Maximum service count reached: {}. Skipping",
-                KNOT_MAX_SERVICES);
+			KNOT_WARN("Maximum service count reached: {}. Skipping", KNOT_MAX_SERVICES);
       return false;
-    }
+		}
     if (find_entry(tid)) {
-      KNOT_WARN("Type ID: {} is already registered. Skipping", tid);
+			KNOT_WARN("Type ID: {} is already registered. Skipping", tid);
       return false;
-    }
+		}
     RegistryEntry &entry = _registry[_count++];
     entry.type_id = tid;
     entry.desc.factory = new Factory<T>();
     entry.desc.strategy = strategy;
-    if (strategy == SINGLETON) {
-      KNOT_INFO("Registering ID: {} as Singleton", tid);
-      entry.desc.storage = _singleton_storage<T>();
-      entry.desc.instance = 0;
-    } else {
-      KNOT_INFO("Registering ID: {} as Transient [{}/{}]", tid,
-                _transient_count + 1, KNOT_MAX_TRANSIENTS);
+		if(strategy == SINGLETON) {
+			KNOT_INFO("Registering ID: {} as Singleton", tid);
+			entry.desc.storage = _singleton_storage<T>();
+			entry.desc.instance = 0;
+		}
+		else {
+			KNOT_INFO("Registering ID: {} as Transient [{}/{}]", tid, _transient_count + 1, KNOT_MAX_TRANSIENTS);
     }
     return true;
   }
 
   template <typename T> T *resolve() {
-    KNOT_INFO("Resolving service with ID: {}", TypeId<T>());
+		KNOT_INFO("Resolving service with ID: {}", TypeId<T>());
     RegistryEntry *entry = find_entry(TypeId<T>());
     if (!entry) {
-      KNOT_WARN("Service with ID: {} is not registered. Returning null",
-                TypeId<T>());
+			KNOT_WARN("Service with ID: {} is not registered. Returning null", TypeId<T>());
       return nullptr;
-    }
+		}
     Descriptor &desc = entry->desc;
     if (desc.strategy == SINGLETON) {
-      KNOT_INFO("Found singleton service with ID: {}", TypeId<T>());
+			KNOT_INFO("Found singleton service: {}", TypeId<T>());
       if (!desc.instance)
-        KNOT_INFO("Creating singleton instance for service with ID: {}",
-                  TypeId<T>());
-      desc.instance = desc.factory->create(desc.storage);
+				KNOT_INFO("SETUP: Creating singleton instance for service: {}", TypeId<T>());
+        desc.instance = desc.factory->create(desc.storage);
       return static_cast<T *>(desc.instance);
     } else {
-      KNOT_INFO("Found transient service: {}", TypeId<T>());
+			KNOT_INFO("Found transient service: {}", TypeId<T>());
       if (_transient_count >= KNOT_MAX_TRANSIENTS) {
-        KNOT_WARN("Transient service count exceeded: [{}/{}]. Returning null",
-                  _transient_count, KNOT_MAX_TRANSIENTS);
-        return nullptr;
-      }
+				KNOT_WARN("Transient service count exceeded: [{}/{}]. Returning null", _transient_count, KNOT_MAX_TRANSIENTS);
+        return 0;
+			}
       T *ptr = static_cast<T *>(desc.factory->create(0));
       _transients[_transient_count].ptr = ptr;
       _transients[_transient_count].factory = desc.factory;
       ++_transient_count;
-      KNOT_INFO("Creating new transient instance for service with ID: {} "
-                "[{}/{}] ADDR: {}",
-                TypeId<T>(), _transient_count, KNOT_MAX_TRANSIENTS,
-                static_cast<void *>(ptr));
+			KNOT_INFO("Creating new transient instance for service: {} [{}/{}] ADDR: {}", TypeId<T>() , _transient_count, KNOT_MAX_TRANSIENTS, static_cast<void *>(ptr));
       return ptr;
-    }
-  }
-  void destroyAllSingletons() {
-    KNOT_INFO("Destroying all singletons [{}]", _count);
-    for (size_t i = 0; i < _count; ++i) {
-      Descriptor &desc = _registry[i].desc;
-      if (desc.strategy == SINGLETON && desc.instance) {
-        desc.factory->destroy(desc.instance);
-        KNOT_INFO("Destroyed singleton service with ID: {}",
-                  _registry[i].type_id);
-        desc.instance = 0;
-      }
     }
   }
 
   void destroyAllTransients() {
-    KNOT_INFO("Destroying all transient services [{}/{}]", _transient_count,
-              KNOT_MAX_TRANSIENTS);
     for (size_t i = 0; i < _transient_count; ++i) {
       _transients[i].factory->destroy(_transients[i].ptr);
       _transients[i].ptr = 0;
@@ -151,13 +128,9 @@ public:
   }
 
   template <typename T> void destroyTransient(T *ptr) {
-    KNOT_INFO("Destroying transient service with ID: {} at ADDR: {}",
-              TypeId<T>(), static_cast<void *>(ptr));
     for (size_t i = 0; i < _transient_count; ++i) {
       if (_transients[i].ptr == ptr) {
         _transients[i].factory->destroy(ptr);
-        KNOT_INFO("Deleted Transient with ID: {}. Shifting other transients",
-                  TypeId<T>());
         for (size_t j = i + 1; j < _transient_count; ++j)
           _transients[j - 1] = _transients[j];
         --_transient_count;

@@ -1,5 +1,7 @@
 #include "../include/Container.hpp"
+#include <cassert>
 #include <gtest/gtest.h>
+#include <iostream>
 
 // TODO: refactor
 // TODO: add more tests
@@ -30,6 +32,7 @@ struct ServiceImplWithArg : IService {
 };
 
 TEST(ContainerTest, RegisterAndResolveSingleton) {
+
   Container container;
   container.registerService<ServiceImpl>(SINGLETON);
 
@@ -69,7 +72,6 @@ Container container;
 }
 */
 int main(int argc, char **argv) {
-
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

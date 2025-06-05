@@ -68,7 +68,7 @@
               cppcheck
               clang-tools
               ninja
-
+              spdlog
               # Misc
               doxygen
               lcov

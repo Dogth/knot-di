@@ -2,6 +2,7 @@
 #define UTIL_HPP
 
 #include "Descriptor.hpp"
+#include <cstddef>
 
 namespace Knot {
 template <typename T> void *TypeId() {
@@ -12,10 +13,11 @@ template <typename T> void *TypeId() {
 struct TransientInfo {
   void *ptr;
   IFactory *factory;
+  size_t alloc_size;
 };
 
 struct RegistryEntry {
-  void *type_id;
+  void *type;
   Descriptor desc;
 };
 }; // namespace Knot

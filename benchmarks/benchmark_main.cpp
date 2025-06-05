@@ -1,8 +1,6 @@
 #include "../include/Container.hpp"
 #include <benchmark/benchmark.h>
 
-#define KNOT_MAX_SERVICES 9999999
-#define KNOT_MAX_TRANSIENTS 9999999
 using namespace Knot;
 
 // A simple service interface and implementation
@@ -34,6 +32,6 @@ static void BM_ResolveService(benchmark::State &state) {
     c.resolve<ServiceImpl>();
   }
 }
-BENCHMARK(BM_ResolveService)->Iterations(4);
+BENCHMARK(BM_ResolveService)->Iterations(16);
 
 BENCHMARK_MAIN();

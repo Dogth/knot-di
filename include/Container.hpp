@@ -17,12 +17,10 @@
 
 // Container class for managing service registrations and resolutions
 namespace Knot {
-// TODO: update macros to use placement new
-FACTORY_GEN // PERF: vtable lookups, but idk how to avoid them here
-            // PERF: plus like separate class for each arity :/
 
-    template <typename T>
-    class Factory : public IFactory {
+FACTORY_GEN
+
+template <typename T> class Factory : public IFactory {
 public:
   void *create(void *buffer) { return buffer ? new (buffer) T() : new T(); }
   void destroy(void *instance) {
@@ -38,23 +36,64 @@ private:
 
   RegistryEntry _registry[KNOT_MAX_SERVICES];
   size_t _count;
+  size_t _used_bytes;
+  size_t _max_bytes;
+  void *_buffer;
+  size_t _buffer_offset;
 
   TransientInfo _transients[KNOT_MAX_TRANSIENTS];
   size_t _transient_count;
 
-  template <typename T> static void *_singleton_storage() {
-    static union {
-      char data[sizeof(T)];
-      long double align;
-    } storage;
-    return &storage;
+  void *_allocate(size_t size, size_t align, size_t *out_alloc_size = 0) {
+    if (_buffer) {
+      KNOT_INFO("Allocating {} bytes from buffer at offset {}", size,
+                _buffer_offset);
+      size_t space = _max_bytes - _buffer_offset;
+      char *base = static_cast<char *>(_buffer) + _buffer_offset;
+      size_t misalign = reinterpret_cast<size_t>(base) % align;
+      size_t pad = misalign ? (align - misalign) : 0;
+      if (space < size + pad) {
+        KNOT_ERR(
+            "Buffer overflow: {} bytes requested, but only {} bytes available",
+            size + pad, space);
+        return 0;
+      }
+      void *ptr = base + pad;
+      if (out_alloc_size)
+        *out_alloc_size = size + pad;
+      _buffer_offset += size + pad;
+      _used_bytes += size + pad;
+      return ptr;
+    } else {
+      if (_used_bytes + size > _max_bytes) {
+        KNOT_ERR(
+            "Heap overflow: {} bytes requested, but only {} bytes available",
+            size, _max_bytes - _used_bytes);
+        return 0;
+      } else if (size == 0)
+        return nullptr; // Avoid allocating zero bytes
+      KNOT_INFO("Allocating {} bytes from heap", size);
+      void *ptr = operator new(size);
+      if (ptr) {
+        if (out_alloc_size)
+          *out_alloc_size = size;
+        _used_bytes += size;
+      }
+      return ptr;
+    }
+  }
+  void _deallocate(void *ptr, size_t size) {
+    if (!_buffer && ptr) {
+      operator delete(ptr);
+    }
+    _used_bytes -= size;
   }
 
   RegistryEntry *find_entry(void *tid) {
-    KNOT_INFO("Looking for service with ID: {} s[{}/{}]", tid, _count,
-              KNOT_MAX_SERVICES);
+    KNOT_INFO("Looking for service with ID: {} s[{}/{}] buf: {}", tid, _count,
+              KNOT_MAX_SERVICES, _used_bytes);
     for (size_t i = 0; i < _count; ++i)
-      if (_registry[i].type_id == tid) {
+      if (_registry[i].type == tid) {
         KNOT_INFO("Found service with ID: {}", tid);
         return &_registry[i];
       } else
@@ -62,12 +101,43 @@ private:
     return 0;
   }
 
-public:
-  Container() : _count(0), _transient_count(0) {}
+  template <typename T> bool register_singleton(IFactory *factory) {
+    size_t size = sizeof(T);
+    void *storage = _allocate(size, alignof(T));
+    ;
+    if (!storage)
+      return false;
+    RegistryEntry &entry = _registry[_count++];
+    entry.type = TypeId<T>();
+    entry.desc.factory = factory;
+    entry.desc.strategy = SINGLETON;
+    entry.desc.storage = storage;
+    entry.desc.instance = nullptr;
+    return true;
+  }
 
-  // Core function for generation. Arity is set by X-macros
-  template <typename T> bool registerService(Strategy strategy) {
+  template <typename T> bool register_transient(IFactory *factory) {
+    RegistryEntry &entry = _registry[_count++];
+    entry.type = TypeId<T>();
+    entry.desc.factory = factory;
+    entry.desc.strategy = TRANSIENT;
+    entry.desc.storage = nullptr;
+    entry.desc.instance = nullptr;
+    return true;
+  }
+  // TODO: rewrite using .registerSingleton and .registerTransient
+  template <typename T>
+  inline bool addService(Strategy strategy, IFactory *factory) {
     void *tid = TypeId<T>();
+    if (!factory) {
+      KNOT_WARN("Factory is null. Cannot register service with ID: {}", tid);
+      return false;
+    }
+    if (strategy != SINGLETON && strategy != TRANSIENT) {
+      KNOT_WARN("Invalid strategy: {}. Must be SINGLETON or TRANSIENT",
+                static_cast<int>(strategy));
+      return false;
+    }
     KNOT_INFO("Registering service with ID: {}", tid);
     if (_count >= KNOT_MAX_SERVICES) {
       KNOT_WARN("Maximum service count reached: {}. Skipping",
@@ -78,20 +148,38 @@ public:
       KNOT_WARN("Type ID: {} is already registered. Skipping", tid);
       return false;
     }
-    RegistryEntry &entry = _registry[_count++];
-    entry.type_id = tid;
-    entry.desc.factory = new Factory<T>();
-    entry.desc.strategy = strategy;
     if (strategy == SINGLETON) {
-      KNOT_INFO("Registering ID: {} as Singleton", tid);
-      entry.desc.storage = _singleton_storage<T>();
-      entry.desc.instance = 0;
+      KNOT_INFO("Registering ID: {} as Singleton");
+      register_singleton<T>(factory);
     } else {
-      KNOT_INFO("Registering ID: {} as Transient [{}/{}]", tid,
-                _transient_count + 1, KNOT_MAX_TRANSIENTS);
+      register_transient<T>(factory);
     }
     return true;
   }
+
+public:
+  // WARN: allocates on heap if no buffer is provided
+  Container()
+      : _count(0), _used_bytes(0), _max_bytes(4096), _buffer(nullptr),
+        _buffer_offset(0), _transient_count(0) {}
+
+  explicit Container(size_t max_bytes)
+      : _count(0), _used_bytes(0), _max_bytes(max_bytes), _buffer(nullptr),
+        _buffer_offset(0), _transient_count(0) {}
+
+  Container(void *buffer, size_t buffer_size)
+      : _count(0), _used_bytes(0), _max_bytes(buffer_size), _buffer(buffer),
+        _buffer_offset(0), _transient_count(0) {}
+
+  Container(void *buffer, size_t buffer_size, size_t offset)
+      : _count(0), _used_bytes(0), _max_bytes(buffer_size), _buffer(buffer),
+        _buffer_offset(offset), _transient_count(0) {}
+
+  template <typename T> bool registerService(Strategy strategy) {
+    return addService<T>(strategy, new Factory<T>());
+  }
+
+  REGISTER_GEN
 
   template <typename T> T *resolve() {
     KNOT_INFO("Resolving service with ID: {}", TypeId<T>());
@@ -116,9 +204,14 @@ public:
                   _transient_count, KNOT_MAX_TRANSIENTS);
         return nullptr;
       }
-      T *ptr = static_cast<T *>(desc.factory->create(0));
-      _transients[_transient_count].ptr = ptr;
+      size_t size = 0;
+      void *mem = _allocate(sizeof(T), sizeof(void *), &size);
+      if (!mem)
+        return nullptr;
+      T *ptr = static_cast<T *>(desc.factory->create(mem));
       _transients[_transient_count].factory = desc.factory;
+      _transients[_transient_count].ptr = ptr;
+      _transients[_transient_count].alloc_size = size;
       ++_transient_count;
       KNOT_INFO("Creating new transient instance for service with ID: {} "
                 "[{}/{}] ADDR: {}",
@@ -133,8 +226,8 @@ public:
       Descriptor &desc = _registry[i].desc;
       if (desc.strategy == SINGLETON && desc.instance) {
         desc.factory->destroy(desc.instance);
-        KNOT_INFO("Destroyed singleton service with ID: {}",
-                  _registry[i].type_id);
+        KNOT_INFO("Destroyed singleton service with ID: {}", _registry[i].type);
+        _deallocate(desc.instance, sizeof(desc.instance));
         desc.instance = 0;
       }
     }
@@ -144,8 +237,14 @@ public:
     KNOT_INFO("Destroying all transient services [{}/{}]", _transient_count,
               KNOT_MAX_TRANSIENTS);
     for (size_t i = 0; i < _transient_count; ++i) {
-      _transients[i].factory->destroy(_transients[i].ptr);
-      _transients[i].ptr = 0;
+      if (_transients[i].ptr && _transients[i].factory)
+        _transients[i].factory->destroy(_transients[i].ptr);
+      _deallocate(_transients[i].ptr, _transients[i].alloc_size);
+      KNOT_INFO("Destroyed transient service with at ADDR: {} [{}]",
+                _transients[i].ptr, _transients[i].alloc_size);
+      _transients[i].ptr = nullptr;
+      _transients[i].alloc_size = 0;
+      _transients[i].factory = nullptr;
     }
     _transient_count = 0;
   }
@@ -156,6 +255,7 @@ public:
     for (size_t i = 0; i < _transient_count; ++i) {
       if (_transients[i].ptr == ptr) {
         _transients[i].factory->destroy(ptr);
+        _deallocate(_transients[i].ptr, _transients[i].alloc_size);
         KNOT_INFO("Deleted Transient with ID: {}. Shifting other transients",
                   TypeId<T>());
         for (size_t j = i + 1; j < _transient_count; ++j)
@@ -165,6 +265,10 @@ public:
       }
     }
   }
+
+  size_t used_bytes() const { return _used_bytes; }
+  size_t max_bytes() const { return _max_bytes; }
+  size_t remaining_bytes() const { return _max_bytes - _used_bytes; }
 };
 } // namespace Knot
 

@@ -60,17 +60,18 @@ TEST(ContainerTest, RegisterAndResolveTransient) {
   delete service1;
   delete service2;
 }
-/*
+
 TEST(ContainerTest, RegisterWithArgAndResolve) {
 
-Container container;
+  char buffer[1024];
+  // TODO: generic trick
+  Container container(buffer, 1024);
   container.registerService<ServiceImplWithArg>(Strategy::SINGLETON, 99);
 
   ServiceImplWithArg *service = container.resolve<ServiceImplWithArg>();
   ASSERT_NE(service, nullptr);
   EXPECT_EQ(service->getValue(), 99);
 }
-*/
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

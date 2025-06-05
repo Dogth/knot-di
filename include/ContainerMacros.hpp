@@ -26,23 +26,16 @@
     (A1 arg1, A2 arg2, A3 arg3, A4 arg4), (A1, A2, A3, A4),                    \
     (arg1, arg2, arg3, arg4))
 
-// TODO: adapt for embedded
 #define R_GEN(N, TMPL, FUNC, TPS, ARGS)                                        \
   template <typename T, EXPAND TMPL>                                           \
   void registerService(Strategy strategy, EXPAND FUNC) {                       \
-    if (_registry.find(&typeid(T))) {                                          \
-      return;                                                                  \
-    }                                                                          \
-    _registry.insert(                                                          \
-        &typeid(T),                                                            \
-        new Descriptor(new Factory##N<T, EXPAND TPS>(EXPAND ARGS), strategy)); \
+    addService<T>(strategy, new Factory##N<T, EXPAND TPS>(EXPAND ARGS));       \
   }
 
 #define REGISTER_GEN R_ARITY_LIST(R_GEN)
 
 // ------- Factory Macros -------
 // Arity list can(and probably should) be redefined
-// TODO: some kinda wrapper for this. Should be easy to redefine
 #define F_ARITY_LIST(X)                                                        \
   X(1, (typename A1), (A1 _arg1), (A1 arg1), (_arg1(arg1)), (_arg1))           \
   X(2, (typename A1, typename A2), (A1 _arg1; A2 _arg2), (A1 arg1, A2 arg2),   \

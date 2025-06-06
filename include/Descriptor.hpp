@@ -1,7 +1,7 @@
 #ifndef DESCRIPTOR_HPP
 #define DESCRIPTOR_HPP
 
-#include "IFactory.hpp"
+#include "Factory.hpp"
 #include "Strategy.hpp"
 
 namespace Knot {

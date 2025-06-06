@@ -24,6 +24,7 @@ find_package(spdlog REQUIRED)
 	target_link_libraries(knot-di INTERFACE spdlog::spdlog)
     message(STATUS "Configuring Debug build")
     add_compile_definitions(DEBUG_BUILD)
+		add_compile_options(-fsanitize=address)
     add_compile_options(-g)
 endif()
 

@@ -4,18 +4,6 @@
 // Tuple expansion macro
 #define EXPAND(...) __VA_ARGS__
 
-#ifdef NDEBUG
-#define KNOT_ERR(...)
-#define KNOT_INFO(...)
-#define KNOT_WARN(...)
-#else
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/spdlog.h>
-#define KNOT_ERR(...) spdlog::error(__VA_ARGS__)
-#define KNOT_INFO(...) spdlog::info(__VA_ARGS__)
-#define KNOT_WARN(...) spdlog::warn(__VA_ARGS__)
-#endif
-
 // ------ Service Macros ------
 #define R_ARITY_LIST(X)                                                        \
   X(1, (typename A1), (A1 arg1), (A1), (arg1))                                 \

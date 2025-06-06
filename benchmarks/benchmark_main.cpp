@@ -27,7 +27,7 @@ static void BM_ResolveService(benchmark::State &state) {
   for (auto _ : state) {
     c.resolve<ServiceImpl>();
   }
-  c.destroyAllTransients(); // Clean up transients after resolving
+  c.destroyAllTransients();
   for (auto _ : state) {
     c.resolve<ServiceImpl>();
   }

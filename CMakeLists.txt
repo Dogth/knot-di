@@ -51,5 +51,3 @@ install(DIRECTORY include/
 ## target_link_options(firmware PRIVATE
 ##     $<$<OR:$<LINK_LANG_AND_ID:C,GNU>,$<LINK_LANG_AND_ID:CXX,GNU>>:-Wl,--gc-sections>
 ## )
-
-

@@ -1,0 +1,92 @@
+\doxysection{Класс Knot\+::Memory\+Pool}
+\hypertarget{class_knot_1_1_memory_pool}{}\label{class_knot_1_1_memory_pool}\index{Knot::MemoryPool@{Knot::MemoryPool}}
+
+
+{\ttfamily \#include $<$Memory\+Pool.\+hpp$>$}
+
+\doxysubsubsection*{Открытые члены}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_knot_1_1_memory_pool_a4f1ddabe83938cdf488e1828de404329}{Memory\+Pool}} (size\+\_\+t max\+\_\+bytes)
+\item 
+\mbox{\hyperlink{class_knot_1_1_memory_pool_ac2e00aa321dfe4c99783003596c0bc4a}{Memory\+Pool}} (void \texorpdfstring{$\ast$}{*}buffer, size\+\_\+t buffer\+\_\+size)
+\item 
+void \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{class_knot_1_1_memory_pool_acd53245eaef74aa95785ab12ba0d24ee}{allocate}} (size\+\_\+t size, size\+\_\+t align, size\+\_\+t \texorpdfstring{$\ast$}{*}out\+\_\+alloc\+\_\+size=0)
+\item 
+void \mbox{\hyperlink{class_knot_1_1_memory_pool_a2fba960bce74aad84dc50b8500959bae}{deallocate}} (void \texorpdfstring{$\ast$}{*}ptr, size\+\_\+t size)
+\item 
+size\+\_\+t \mbox{\hyperlink{class_knot_1_1_memory_pool_a9c6e01992942007280f938f4119e2457}{get\+Used\+Bytes}} () const
+\item 
+size\+\_\+t \mbox{\hyperlink{class_knot_1_1_memory_pool_a1d86cd2a19071a65bfa395cc89c443f9}{get\+Max\+Bytes}} () const
+\item 
+void \mbox{\hyperlink{class_knot_1_1_memory_pool_af9016987234046ca7b054c9f37356ade}{reset}} ()
+\item 
+void \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{class_knot_1_1_memory_pool_a7fb3d7851f94b1e42d156eec850780d5}{get\+Buffer}} () const
+\item 
+size\+\_\+t \mbox{\hyperlink{class_knot_1_1_memory_pool_a1c59c0bba77858551223215b79449c87}{get\+Buffer\+Offset}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Конструктор(ы)}
+\Hypertarget{class_knot_1_1_memory_pool_a4f1ddabe83938cdf488e1828de404329}\index{Knot::MemoryPool@{Knot::MemoryPool}!MemoryPool@{MemoryPool}}
+\index{MemoryPool@{MemoryPool}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{MemoryPool()}{MemoryPool()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_a4f1ddabe83938cdf488e1828de404329} 
+Knot\+::\+Memory\+Pool\+::\+Memory\+Pool (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{max\+\_\+bytes}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\Hypertarget{class_knot_1_1_memory_pool_ac2e00aa321dfe4c99783003596c0bc4a}\index{Knot::MemoryPool@{Knot::MemoryPool}!MemoryPool@{MemoryPool}}
+\index{MemoryPool@{MemoryPool}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{MemoryPool()}{MemoryPool()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_ac2e00aa321dfe4c99783003596c0bc4a} 
+Knot\+::\+Memory\+Pool\+::\+Memory\+Pool (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{buffer}{, }\item[{size\+\_\+t}]{buffer\+\_\+size}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+\doxysubsection{Методы}
+\Hypertarget{class_knot_1_1_memory_pool_acd53245eaef74aa95785ab12ba0d24ee}\index{Knot::MemoryPool@{Knot::MemoryPool}!allocate@{allocate}}
+\index{allocate@{allocate}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{allocate()}{allocate()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_acd53245eaef74aa95785ab12ba0d24ee} 
+void \texorpdfstring{$\ast$}{*} Knot\+::\+Memory\+Pool\+::allocate (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{size}{, }\item[{size\+\_\+t}]{align}{, }\item[{size\+\_\+t \texorpdfstring{$\ast$}{*}}]{out\+\_\+alloc\+\_\+size}{ = {\ttfamily 0}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\Hypertarget{class_knot_1_1_memory_pool_a2fba960bce74aad84dc50b8500959bae}\index{Knot::MemoryPool@{Knot::MemoryPool}!deallocate@{deallocate}}
+\index{deallocate@{deallocate}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{deallocate()}{deallocate()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_a2fba960bce74aad84dc50b8500959bae} 
+void Knot\+::\+Memory\+Pool\+::deallocate (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{ptr}{, }\item[{size\+\_\+t}]{size}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+\Hypertarget{class_knot_1_1_memory_pool_a7fb3d7851f94b1e42d156eec850780d5}\index{Knot::MemoryPool@{Knot::MemoryPool}!getBuffer@{getBuffer}}
+\index{getBuffer@{getBuffer}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{getBuffer()}{getBuffer()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_a7fb3d7851f94b1e42d156eec850780d5} 
+void \texorpdfstring{$\ast$}{*} Knot\+::\+Memory\+Pool\+::get\+Buffer (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\Hypertarget{class_knot_1_1_memory_pool_a1c59c0bba77858551223215b79449c87}\index{Knot::MemoryPool@{Knot::MemoryPool}!getBufferOffset@{getBufferOffset}}
+\index{getBufferOffset@{getBufferOffset}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{getBufferOffset()}{getBufferOffset()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_a1c59c0bba77858551223215b79449c87} 
+size\+\_\+t Knot\+::\+Memory\+Pool\+::get\+Buffer\+Offset (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\Hypertarget{class_knot_1_1_memory_pool_a1d86cd2a19071a65bfa395cc89c443f9}\index{Knot::MemoryPool@{Knot::MemoryPool}!getMaxBytes@{getMaxBytes}}
+\index{getMaxBytes@{getMaxBytes}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{getMaxBytes()}{getMaxBytes()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_a1d86cd2a19071a65bfa395cc89c443f9} 
+size\+\_\+t Knot\+::\+Memory\+Pool\+::get\+Max\+Bytes (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\Hypertarget{class_knot_1_1_memory_pool_a9c6e01992942007280f938f4119e2457}\index{Knot::MemoryPool@{Knot::MemoryPool}!getUsedBytes@{getUsedBytes}}
+\index{getUsedBytes@{getUsedBytes}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{getUsedBytes()}{getUsedBytes()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_a9c6e01992942007280f938f4119e2457} 
+size\+\_\+t Knot\+::\+Memory\+Pool\+::get\+Used\+Bytes (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+\Hypertarget{class_knot_1_1_memory_pool_af9016987234046ca7b054c9f37356ade}\index{Knot::MemoryPool@{Knot::MemoryPool}!reset@{reset}}
+\index{reset@{reset}!Knot::MemoryPool@{Knot::MemoryPool}}
+\doxysubsubsection{\texorpdfstring{reset()}{reset()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_memory_pool_af9016987234046ca7b054c9f37356ade} 
+void Knot\+::\+Memory\+Pool\+::reset (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Объявления и описания членов класса находятся в файле\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{_memory_pool_8hpp}{Memory\+Pool.\+hpp}}\end{DoxyCompactItemize}

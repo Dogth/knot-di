@@ -1,0 +1,28 @@
+\doxysection{Descriptor.\+hpp}
+\hypertarget{_descriptor_8hpp_source}{}\label{_descriptor_8hpp_source}\index{include/Descriptor.hpp@{include/Descriptor.hpp}}
+\mbox{\hyperlink{_descriptor_8hpp}{См. документацию.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{preprocessor}{\#ifndef\ DESCRIPTOR\_HPP}}
+\DoxyCodeLine{00002\ \textcolor{preprocessor}{\#define\ DESCRIPTOR\_HPP}}
+\DoxyCodeLine{00003\ }
+\DoxyCodeLine{00004\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_factory_8hpp}{Factory.hpp}}"{}}}
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_strategy_8hpp}{Strategy.hpp}}"{}}}
+\DoxyCodeLine{00006\ }
+\DoxyCodeLine{00007\ \textcolor{keyword}{namespace\ }\mbox{\hyperlink{namespace_knot}{Knot}}\ \{}
+\DoxyCodeLine{00008\ \textcolor{keyword}{struct\ }\mbox{\hyperlink{struct_knot_1_1_descriptor_ae80adb316dc0be089611c485d0e7fdf8}{Descriptor}}\ \{}
+\DoxyCodeLine{00009\ \ \ \mbox{\hyperlink{class_knot_1_1_i_factory}{IFactory}}\ *\mbox{\hyperlink{struct_knot_1_1_descriptor_a8efd47264e3428bfe225edfab3ec4cf7}{factory}};}
+\DoxyCodeLine{00010\ \ \ \mbox{\hyperlink{_strategy_8hpp_acf7192c608527efb8f8dedf0a3f2e706}{Strategy}}\ \mbox{\hyperlink{struct_knot_1_1_descriptor_a4f391dbbe3f1c713360257fb10d5dfee}{strategy}};}
+\DoxyCodeLine{00011\ \ \ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{struct_knot_1_1_descriptor_a6ff2348022d066f78bcb6dfcae995d10}{instance}};}
+\DoxyCodeLine{00012\ \ \ \textcolor{keywordtype}{void}\ *\mbox{\hyperlink{struct_knot_1_1_descriptor_a3553620e4356d57d1f294449b8ee3f95}{storage}};}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \ \ \mbox{\hyperlink{struct_knot_1_1_descriptor_ae80adb316dc0be089611c485d0e7fdf8}{Descriptor}}()\ :\ \mbox{\hyperlink{struct_knot_1_1_descriptor_a8efd47264e3428bfe225edfab3ec4cf7}{factory}}(0),\ \mbox{\hyperlink{struct_knot_1_1_descriptor_a4f391dbbe3f1c713360257fb10d5dfee}{strategy}}(\mbox{\hyperlink{_strategy_8hpp_acf7192c608527efb8f8dedf0a3f2e706a57da18394d2f90538c40b0b8d4a3a3c7}{SINGLETON}}),\ \mbox{\hyperlink{struct_knot_1_1_descriptor_a6ff2348022d066f78bcb6dfcae995d10}{instance}}(0),\ \mbox{\hyperlink{struct_knot_1_1_descriptor_a3553620e4356d57d1f294449b8ee3f95}{storage}}(0)\ \{\}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00017\ \ \ \mbox{\hyperlink{struct_knot_1_1_descriptor_ae80adb316dc0be089611c485d0e7fdf8}{Descriptor}}(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_knot_1_1_descriptor}{Descriptor}}\ \&);}
+\DoxyCodeLine{00018\ \ \ \mbox{\hyperlink{struct_knot_1_1_descriptor}{Descriptor}}\ \&operator=(\textcolor{keyword}{const}\ \mbox{\hyperlink{struct_knot_1_1_descriptor}{Descriptor}}\ \&);}
+\DoxyCodeLine{00019\ \};}
+\DoxyCodeLine{00020\ \};\ \textcolor{comment}{//\ namespace\ Knot}}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00022\ \textcolor{preprocessor}{\#endif\ }\textcolor{comment}{//\ DESCRIPTOR\_HPP}}
+
+\end{DoxyCode}

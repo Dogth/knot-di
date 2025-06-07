@@ -1,0 +1,96 @@
+\doxysection{Файл tests/\+Container\+Tests.cpp}
+\hypertarget{_container_tests_8cpp}{}\label{_container_tests_8cpp}\index{tests/ContainerTests.cpp@{tests/ContainerTests.cpp}}
+{\ttfamily \#include "{}../include/\+Container.\+hpp"{}}\newline
+{\ttfamily \#include $<$cassert$>$}\newline
+{\ttfamily \#include $<$gtest/gtest.\+h$>$}\newline
+\doxysubsubsection*{Классы}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{struct_i_service}{IService}}
+\item 
+struct \mbox{\hyperlink{struct_t_service}{TService}}
+\item 
+struct \mbox{\hyperlink{struct_t_service_impl}{TService\+Impl}}
+\item 
+struct \mbox{\hyperlink{struct_service_impl}{Service\+Impl}}
+\item 
+struct \mbox{\hyperlink{struct_service_impl_with_arg}{Service\+Impl\+With\+Arg}}
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Функции}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_ad5d47fba48882d003936148b104bb2fb}{TEST}} (Container\+Test, Register\+And\+Resolve\+Singleton)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_acf3d7470f15f9394413e943bc419a809}{TEST}} (Container\+Test, Register\+And\+Resolve\+Transient)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_ab3cd7c39849e343bf2fec2396be44a58}{TEST}} (Container\+Test, Register\+With\+Arg\+And\+Resolve)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_ab10820363e06e706d56b89b9f7ce3f9f}{TEST}} (Container\+Test, Resolve\+Unregistered\+Service)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_a835ca3932357ee128a5382685fe2f1fc}{TEST}} (Container\+Test, Register\+Multiple\+Services)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_ab282437348054d9eed0b4e8681c2af5c}{TEST}} (Container\+Test, Destroy\+All\+Singletons)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_a912f647ff2f3916b5549f8211de7b827}{TEST}} (Container\+Test, Destroy\+All\+Transient)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_a6e560230f2bee54d4e38ce171d1d5166}{TEST}} (Container\+Test, Dependency\+Injection\+Works)
+\item 
+\mbox{\hyperlink{_container_tests_8cpp_a5ccf4c067faaaa5bfa9d327fe183d0c2}{TEST}} (Container\+Test, Container\+Does\+Not\+Affect\+Nearby\+Memory)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Функции}
+\Hypertarget{_container_tests_8cpp_a5ccf4c067faaaa5bfa9d327fe183d0c2}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [1/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_a5ccf4c067faaaa5bfa9d327fe183d0c2} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Container\+Does\+Not\+Affect\+Nearby\+Memory}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_a6e560230f2bee54d4e38ce171d1d5166}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [2/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_a6e560230f2bee54d4e38ce171d1d5166} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Dependency\+Injection\+Works}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_ab282437348054d9eed0b4e8681c2af5c}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [3/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_ab282437348054d9eed0b4e8681c2af5c} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Destroy\+All\+Singletons}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_a912f647ff2f3916b5549f8211de7b827}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [4/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_a912f647ff2f3916b5549f8211de7b827} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Destroy\+All\+Transient}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_ad5d47fba48882d003936148b104bb2fb}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [5/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_ad5d47fba48882d003936148b104bb2fb} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Register\+And\+Resolve\+Singleton}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_acf3d7470f15f9394413e943bc419a809}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [6/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_acf3d7470f15f9394413e943bc419a809} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Register\+And\+Resolve\+Transient}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_a835ca3932357ee128a5382685fe2f1fc}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [7/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_a835ca3932357ee128a5382685fe2f1fc} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Register\+Multiple\+Services}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_ab3cd7c39849e343bf2fec2396be44a58}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [8/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_ab3cd7c39849e343bf2fec2396be44a58} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Register\+With\+Arg\+And\+Resolve}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_container_tests_8cpp_ab10820363e06e706d56b89b9f7ce3f9f}\index{ContainerTests.cpp@{ContainerTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!ContainerTests.cpp@{ContainerTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [9/9]}}
+{\footnotesize\ttfamily \label{_container_tests_8cpp_ab10820363e06e706d56b89b9f7ce3f9f} 
+TEST (\begin{DoxyParamCaption}\item[{Container\+Test}]{}{, }\item[{Resolve\+Unregistered\+Service}]{}{}\end{DoxyParamCaption})}
+

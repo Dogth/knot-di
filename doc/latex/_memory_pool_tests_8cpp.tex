@@ -1,0 +1,83 @@
+\doxysection{Файл tests/\+Memory\+Pool\+Tests.cpp}
+\hypertarget{_memory_pool_tests_8cpp}{}\label{_memory_pool_tests_8cpp}\index{tests/MemoryPoolTests.cpp@{tests/MemoryPoolTests.cpp}}
+{\ttfamily \#include "{}../include/\+Memory\+Pool.\+hpp"{}}\newline
+{\ttfamily \#include $<$cassert$>$}\newline
+{\ttfamily \#include $<$gtest/gtest.\+h$>$}\newline
+\doxysubsubsection*{Функции}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_ad5654671f08e821d97c58f33a8074709}{TEST}} (Memory\+Pool\+Test, Allocate\+And\+Deallocate)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_a09b01abbf77223ad0e3247a6698acd9d}{TEST}} (Memory\+Pool\+Test, Buffer\+Overflow)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_a6c95afac9888c274e7875cfa1e551d71}{TEST}} (Memory\+Pool\+Test, Alignment)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_ac7a7548b087573b6b8175836be56065b}{TEST}} (Memory\+Pool\+Test, Zero\+Size\+Allocation)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_aef7980773a331c5ea55ffe70e6764851}{TEST}} (Memory\+Pool\+Test, Multiple\+Allocations\+And\+Deallocations)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_a7c614fe5669f8c1c93477c070cb95ac4}{TEST}} (Memory\+Pool\+Test, Heap\+Overflow)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_a70582f2921a795c2cd0624913205a0a1}{TEST}} (Memory\+Pool\+Test, Reset\+Functionality)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_aaf6f1ff92e7264d8297a1d9cd096127f}{TEST}} (Memory\+Pool\+Test, Max\+Bytes\+Query)
+\item 
+\mbox{\hyperlink{_memory_pool_tests_8cpp_aa9354ed6d93c57192f347e6fa728fbe2}{TEST}} (Memory\+Pool\+Test, Buffer\+Does\+Not\+Affect\+Nearby\+Memory)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Функции}
+\Hypertarget{_memory_pool_tests_8cpp_a6c95afac9888c274e7875cfa1e551d71}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [1/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_a6c95afac9888c274e7875cfa1e551d71} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Alignment}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_ad5654671f08e821d97c58f33a8074709}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [2/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_ad5654671f08e821d97c58f33a8074709} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Allocate\+And\+Deallocate}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_aa9354ed6d93c57192f347e6fa728fbe2}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [3/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_aa9354ed6d93c57192f347e6fa728fbe2} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Buffer\+Does\+Not\+Affect\+Nearby\+Memory}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_a09b01abbf77223ad0e3247a6698acd9d}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [4/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_a09b01abbf77223ad0e3247a6698acd9d} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Buffer\+Overflow}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_a7c614fe5669f8c1c93477c070cb95ac4}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [5/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_a7c614fe5669f8c1c93477c070cb95ac4} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Heap\+Overflow}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_aaf6f1ff92e7264d8297a1d9cd096127f}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [6/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_aaf6f1ff92e7264d8297a1d9cd096127f} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Max\+Bytes\+Query}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_aef7980773a331c5ea55ffe70e6764851}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [7/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_aef7980773a331c5ea55ffe70e6764851} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Multiple\+Allocations\+And\+Deallocations}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_a70582f2921a795c2cd0624913205a0a1}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [8/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_a70582f2921a795c2cd0624913205a0a1} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Reset\+Functionality}]{}{}\end{DoxyParamCaption})}
+
+\Hypertarget{_memory_pool_tests_8cpp_ac7a7548b087573b6b8175836be56065b}\index{MemoryPoolTests.cpp@{MemoryPoolTests.cpp}!TEST@{TEST}}
+\index{TEST@{TEST}!MemoryPoolTests.cpp@{MemoryPoolTests.cpp}}
+\doxysubsubsection{\texorpdfstring{TEST()}{TEST()}\hspace{0.1cm}{\footnotesize\ttfamily [9/9]}}
+{\footnotesize\ttfamily \label{_memory_pool_tests_8cpp_ac7a7548b087573b6b8175836be56065b} 
+TEST (\begin{DoxyParamCaption}\item[{Memory\+Pool\+Test}]{}{, }\item[{Zero\+Size\+Allocation}]{}{}\end{DoxyParamCaption})}
+

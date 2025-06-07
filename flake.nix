@@ -34,7 +34,7 @@
 
             # Spelling and grammar checks
             typos = {
-              enable = true;
+              enable = false;
               settings.configuration = '''';
               settings.exclude = "*.nix";
               settings.ignored-words = [

@@ -1,0 +1,218 @@
+\doxysection{Класс Knot\+::Container}
+\hypertarget{class_knot_1_1_container}{}\label{class_knot_1_1_container}\index{Knot::Container@{Knot::Container}}
+
+
+Контейнер для управления сервисами  
+
+
+
+
+{\ttfamily \#include $<$Container.\+hpp$>$}
+
+\doxysubsubsection*{Открытые члены}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_knot_1_1_container_a19ca7c0dfa56bed3ac39afa878487edf}{Container}} ()
+\begin{DoxyCompactList}\small\item\em Конструктор контейнера \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_knot_1_1_container_a551cabc40700aa939146c71d3dd81f44}{Container}} (size\+\_\+t max\+\_\+bytes)
+\begin{DoxyCompactList}\small\item\em Конструктор контейнера с указанием максимального размера пула памяти \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_knot_1_1_container_a0e07a68d515c2f8bb1276f8a961ce960}{Container}} (void \texorpdfstring{$\ast$}{*}buffer, size\+\_\+t buffer\+\_\+size)
+\begin{DoxyCompactList}\small\item\em Конструктор контейнера с указанием буфера и его размера \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_knot_1_1_container_a0fbd32476f8f066f68d977d18af6bafd}{\texorpdfstring{$\sim$}{\string~}\+Container}} ()
+\begin{DoxyCompactList}\small\item\em Деструктор контейнера \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename T$>$ }\\bool \mbox{\hyperlink{class_knot_1_1_container_a54aebbf7b4fcbf12f6bede3b4d132dae}{register\+Service}} (\mbox{\hyperlink{_strategy_8hpp_acf7192c608527efb8f8dedf0a3f2e706}{Strategy}} strategy)
+\begin{DoxyCompactList}\small\item\em Регистрация сервиса в контейнере \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename T$>$ }\\\mbox{\hyperlink{_container_macros_8hpp_a1de051757a89f3ee99e0eebd6214fd8e}{REGISTER\+\_\+\+GEN}} T \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{class_knot_1_1_container_a9f2501e818ea2c32eaa827f89fc31e4a}{resolve}} ()
+\begin{DoxyCompactList}\small\item\em Получение зарегистрированного сервиса по его типу \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_knot_1_1_container_aacd6e366d6f1d452f1a0e41c671f020c}{destroy\+All\+Singletons}} ()
+\begin{DoxyCompactList}\small\item\em Уничтожение всех синглтон сервисов \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_knot_1_1_container_a38a66d665fe8f1fe4c3a5291d7a23d8b}{destroy\+All\+Transients}} ()
+\begin{DoxyCompactList}\small\item\em Уничтожение всех временных сервисов \end{DoxyCompactList}\item 
+{\footnotesize template$<$typename T$>$ }\\void \mbox{\hyperlink{class_knot_1_1_container_aa0879c9247732c2b809463685fa336f8}{destroy\+Transient}} (T \texorpdfstring{$\ast$}{*}ptr)
+\begin{DoxyCompactList}\small\item\em Уничтожение временного сервиса по указателю \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Подробное описание}
+Контейнер для управления сервисами 
+
+Этот класс предоставляет функциональность для регистрации и разрешения сервисов, а также управления их жизненным циклом. Он поддерживает стратегии синглтона и временных сервисов, а также использует \doxylink{class_knot_1_1_memory_pool}{Memory\+Pool} для управления памятью. 
+
+\doxysubsection{Конструктор(ы)}
+\Hypertarget{class_knot_1_1_container_a19ca7c0dfa56bed3ac39afa878487edf}\index{Knot::Container@{Knot::Container}!Container@{Container}}
+\index{Container@{Container}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{Container()}{Container()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_a19ca7c0dfa56bed3ac39afa878487edf} 
+Knot\+::\+Container\+::\+Container (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Конструктор контейнера 
+
+Создает контейнер с нулевым счетчиком сервисов и временных сервисов, а также инициализирует пул памяти с размером 4096 байт.
+
+\begin{DoxyNote}{Заметки}
+Если требуется использовать другой размер пула памяти, рекомендуется использовать конструктор с параметром max\+\_\+bytes. 
+\end{DoxyNote}
+\Hypertarget{class_knot_1_1_container_a551cabc40700aa939146c71d3dd81f44}\index{Knot::Container@{Knot::Container}!Container@{Container}}
+\index{Container@{Container}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{Container()}{Container()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_a551cabc40700aa939146c71d3dd81f44} 
+Knot\+::\+Container\+::\+Container (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{max\+\_\+bytes}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+
+
+Конструктор контейнера с указанием максимального размера пула памяти 
+
+Создает контейнер с нулевым счетчиком сервисов и временных сервисов, а также инициализирует пул памяти с заданным размером. 
+\begin{DoxyParams}{Аргументы}
+{\em max\+\_\+bytes} & Максимальный размер пула памяти в байтах.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Заметки}
+Если требуется использовать буфер для пула памяти, рекомендуется использовать конструктор с указанием буфера и его размера. 
+\end{DoxyNote}
+\Hypertarget{class_knot_1_1_container_a0e07a68d515c2f8bb1276f8a961ce960}\index{Knot::Container@{Knot::Container}!Container@{Container}}
+\index{Container@{Container}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{Container()}{Container()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_a0e07a68d515c2f8bb1276f8a961ce960} 
+Knot\+::\+Container\+::\+Container (\begin{DoxyParamCaption}\item[{void \texorpdfstring{$\ast$}{*}}]{buffer}{, }\item[{size\+\_\+t}]{buffer\+\_\+size}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Конструктор контейнера с указанием буфера и его размера 
+
+Создает контейнер с нулевым счетчиком сервисов и временных сервисов, а также инициализирует пул памяти с заданным буфером и его размером. 
+\begin{DoxyParams}{Аргументы}
+{\em buffer} & Указатель на буфер, который будет использоваться в качестве пула памяти. \\
+\hline
+{\em buffer\+\_\+size} & Размер буфера в байтах.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Заметки}
+Если требуется использовать пул памяти без буфера, рекомендуется использовать конструктор без параметров или с указанием максимального размера пула памяти. 
+\end{DoxyNote}
+\Hypertarget{class_knot_1_1_container_a0fbd32476f8f066f68d977d18af6bafd}\index{Knot::Container@{Knot::Container}!````~Container@{\texorpdfstring{$\sim$}{\string~}Container}}
+\index{````~Container@{\texorpdfstring{$\sim$}{\string~}Container}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{\texorpdfstring{$\sim$}{\string~}Container()}{\string~Container()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_a0fbd32476f8f066f68d977d18af6bafd} 
+Knot\+::\+Container\+::\texorpdfstring{$\sim$}{\string~}\+Container (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Деструктор контейнера 
+
+Освобождает все зарегистрированные сервисы и временные сервисы, вызывая соответствующие методы для уничтожения синглтонов и временных сервисов.
+
+\begin{DoxyNote}{Заметки}
+Этот деструктор вызывается автоматически при уничтожении объекта \doxylink{class_knot_1_1_container}{Container}. 
+\end{DoxyNote}
+
+
+\doxysubsection{Методы}
+\Hypertarget{class_knot_1_1_container_aacd6e366d6f1d452f1a0e41c671f020c}\index{Knot::Container@{Knot::Container}!destroyAllSingletons@{destroyAllSingletons}}
+\index{destroyAllSingletons@{destroyAllSingletons}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{destroyAllSingletons()}{destroyAllSingletons()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_aacd6e366d6f1d452f1a0e41c671f020c} 
+void Knot\+::\+Container\+::destroy\+All\+Singletons (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Уничтожение всех синглтон сервисов 
+
+\begin{DoxyNote}{Заметки}
+Этот метод освобождает память, занятую всеми синглтон сервисами, и вызывает их деструкторы. 
+\end{DoxyNote}
+\Hypertarget{class_knot_1_1_container_a38a66d665fe8f1fe4c3a5291d7a23d8b}\index{Knot::Container@{Knot::Container}!destroyAllTransients@{destroyAllTransients}}
+\index{destroyAllTransients@{destroyAllTransients}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{destroyAllTransients()}{destroyAllTransients()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_a38a66d665fe8f1fe4c3a5291d7a23d8b} 
+void Knot\+::\+Container\+::destroy\+All\+Transients (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Уничтожение всех временных сервисов 
+
+\begin{DoxyNote}{Заметки}
+Этот метод освобождает память, занятую всеми временными сервисами, и вызывает их деструкторы. 
+\end{DoxyNote}
+\Hypertarget{class_knot_1_1_container_aa0879c9247732c2b809463685fa336f8}\index{Knot::Container@{Knot::Container}!destroyTransient@{destroyTransient}}
+\index{destroyTransient@{destroyTransient}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{destroyTransient()}{destroyTransient()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_aa0879c9247732c2b809463685fa336f8} 
+template$<$typename T$>$ \\
+void Knot\+::\+Container\+::destroy\+Transient (\begin{DoxyParamCaption}\item[{T \texorpdfstring{$\ast$}{*}}]{ptr}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Уничтожение временного сервиса по указателю 
+
+Этот метод освобождает память, занятую временным сервисом, и вызывает его деструктор. \begin{DoxyNote}{Заметки}
+Если сервис не найден, ничего не происходит. 
+\end{DoxyNote}
+
+\begin{DoxyTemplParams}{Параметры шаблона}
+{\em T} & Тип временного сервиса, который нужно уничтожить \\
+\hline
+\end{DoxyTemplParams}
+
+\begin{DoxyParams}{Аргументы}
+{\em ptr} & Указатель на временный сервис, который нужно уничтожить\\
+\hline
+\end{DoxyParams}
+\begin{DoxyNote}{Заметки}
+Этот метод используется для управления жизненным циклом временных сервисов, которые были созданы с помощью метода .\doxylink{class_knot_1_1_container_a9f2501e818ea2c32eaa827f89fc31e4a}{resolve()}. 
+\end{DoxyNote}
+\Hypertarget{class_knot_1_1_container_a54aebbf7b4fcbf12f6bede3b4d132dae}\index{Knot::Container@{Knot::Container}!registerService@{registerService}}
+\index{registerService@{registerService}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{registerService()}{registerService()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_a54aebbf7b4fcbf12f6bede3b4d132dae} 
+template$<$typename T$>$ \\
+bool Knot\+::\+Container\+::register\+Service (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{_strategy_8hpp_acf7192c608527efb8f8dedf0a3f2e706}{Strategy}}}]{strategy}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Регистрация сервиса в контейнере 
+
+Этот метод позволяет зарегистрировать сервис в контейнере с заданной стратегией создания (SINGLETON или TRANSIENT). 
+\begin{DoxyParams}{Аргументы}
+{\em strategy} & Стратегия создания сервиса \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyTemplParams}{Параметры шаблона}
+{\em T} & Тип сервиса, который нужно зарегистрировать \\
+\hline
+\end{DoxyTemplParams}
+\begin{DoxyReturn}{Возвращает}
+true, если регистрация успешна, иначе false.
+\end{DoxyReturn}
+\begin{DoxyNote}{Заметки}
+Если сервис уже зарегистрирован, регистрация не будет выполнена. 
+\end{DoxyNote}
+\Hypertarget{class_knot_1_1_container_a9f2501e818ea2c32eaa827f89fc31e4a}\index{Knot::Container@{Knot::Container}!resolve@{resolve}}
+\index{resolve@{resolve}!Knot::Container@{Knot::Container}}
+\doxysubsubsection{\texorpdfstring{resolve()}{resolve()}}
+{\footnotesize\ttfamily \label{class_knot_1_1_container_a9f2501e818ea2c32eaa827f89fc31e4a} 
+template$<$typename T$>$ \\
+\mbox{\hyperlink{_container_macros_8hpp_a1de051757a89f3ee99e0eebd6214fd8e}{REGISTER\+\_\+\+GEN}} T \texorpdfstring{$\ast$}{*} Knot\+::\+Container\+::resolve (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Получение зарегистрированного сервиса по его типу 
+
+Этот метод позволяет получить зарегистрированный сервис по его типу. 
+\begin{DoxyTemplParams}{Параметры шаблона}
+{\em T} & Тип сервиса, который нужно получить \\
+\hline
+\end{DoxyTemplParams}
+\begin{DoxyReturn}{Возвращает}
+Указатель на сервис типа T, или nullptr, если сервис не зарегистрирован или не может быть создан.
+\end{DoxyReturn}
+\begin{DoxyNote}{Заметки}
+Если сервис зарегистрирован как SINGLETON, он будет создан при первом вызове resolve и сохранен для последующих вызовов. Если сервис зарегистрирован как TRANSIENT, он будет создан каждый раз при вызове resolve. 
+\end{DoxyNote}
+
+
+Объявления и описания членов класса находятся в файле\+:\begin{DoxyCompactItemize}
+\item 
+include/\mbox{\hyperlink{_container_8hpp}{Container.\+hpp}}\end{DoxyCompactItemize}

@@ -1,91 +1,287 @@
+/** @file
+ * @brief Заголовочный файл для класса Container. Класс предназначен для
+ * управления регистрацией и разрешением сервисов
+ * @version 1.0
+ *
+ * Этот файл содержит определение класса Container, который управляет
+ * регистрацией сервисов и их разрешением. Он включает в себя методы для
+ * регистрации сервисов, разрешения сервисов, а также управления временными и
+ * синглтон сервисами.
+ */
 #ifndef CONTAINER_HPP
 #define CONTAINER_HPP
 
 #include "ContainerMacros.hpp"
 #include "Descriptor.hpp"
-#include "IFactory.hpp"
-#include "StaticMap.hpp"
-#include <typeinfo>
+#include "Factory.hpp"
+#include "MemoryPool.hpp"
+#include "Util.hpp"
+#include <cstddef>
 
-// Container class for managing service registrations and resolutions
+#ifndef KNOT_MAX_SERVICES
+#define KNOT_MAX_SERVICES 16
+#endif
+
+#ifndef KNOT_MAX_TRANSIENTS
+#define KNOT_MAX_TRANSIENTS 32
+#endif
+
 namespace Knot {
 
-FACTORY_GEN // PERF: vtable lookups, but idk how to avoid them here
-            // PERF: plus like separate class for each arity :/
-    template <typename T>
-    class Factory : public IFactory {
-public:
-  virtual void *create() override { return new T(); }
-  virtual void deleteInstance(void *instance) override {
-    delete static_cast<T *>(instance);
-  }
-};
-
+/** @brief Контейнер для управления сервисами
+ *
+ * Этот класс предоставляет функциональность для регистрации и разрешения
+ * сервисов, а также управления их жизненным циклом. Он поддерживает стратегии
+ * синглтона и временных сервисов, а также использует MemoryPool для управления
+ * памятью.
+ */
 class Container {
 private:
-#ifdef KNOT_SIZE
-  typedef knot::static_map<const std::type_info *, Descriptor *, KNOT_SIZE>
-      Registry;
-#else
-  typedef StaticMap<const std::type_info *, Descriptor *, 16> Registry;
-#endif
-  Registry _registry;
+  Container(const Container &);            // Запрет копирования контейнера
+  Container &operator=(const Container &); // Запрет присваивания контейнера
 
-  static Container *_instancePtr;
+  size_t _service_count;   // Количество зарегистрированных сервисов
+  size_t _transient_count; // Количество временных сервисов
 
-  Container() = default;                            // no-args constructor
-  Container(const Container &) = delete;            // uncopyable
-  Container &operator=(const Container &) = delete; // unmovable
+  MemoryPool _pool; // Пул памяти для управления памятью сервисов
+
+  RegistryEntry
+      _registry[KNOT_MAX_SERVICES]; // Реестр зарегистрированных сервисов
+  TransientInfo _transients[KNOT_MAX_TRANSIENTS]; // Массив временных сервисов
+
+  /** @brief метод для поиска записи в реестре по идентификатору типа
+   * @param tid Указатель на идентификатор типа
+   * @return Указатель на найденную запись или nullptr, если запись не найдена
+   */
+  RegistryEntry *find_entry(void *tid) {
+    for (size_t i = 0; i < _service_count; ++i)
+      if (_registry[i].type == tid)
+        return &_registry[i];
+    return nullptr;
+  }
+
+  /** @brief метод для регистрации синглтон сервиса
+   * @param factory Указатель на фабрику, создающую сервис
+   * @tparam T Тип сервиса
+   * @return true, если регистрация успешна, иначе false
+   */
+  template <typename T> bool register_singleton(IFactory *factory) {
+    size_t size = sizeof(T);
+    void *mem = _pool.allocate(size, sizeof(void *));
+    if (!mem)
+      return false;
+    RegistryEntry &entry = _registry[_service_count++];
+    entry.type = TypeId<T>();
+    entry.desc.factory = factory;
+    entry.desc.strategy = SINGLETON;
+    entry.desc.storage = mem;
+    entry.desc.instance = nullptr;
+    return true;
+  }
+
+  /** @brief метод для регистрации временного сервиса
+   * @param factory Указатель на фабрику, создающую сервис
+   * @tparam T Тип сервиса
+   * @return true, если регистрация успешна, иначе false
+   */
+  template <typename T> bool register_transient(IFactory *factory) {
+    RegistryEntry &entry = _registry[_service_count++];
+    entry.type = TypeId<T>();
+    entry.desc.factory = factory;
+    entry.desc.strategy = TRANSIENT;
+    entry.desc.storage = nullptr;
+    entry.desc.instance = nullptr;
+    return true;
+  }
+
+  /** @brief метод для добавления сервиса в контейнер
+   * @param strategy Стратегия создания сервиса (SINGLETON или TRANSIENT). По
+   * умолчанию SINGLETON.
+   * @param factory Указатель на фабрику, создающую сервис
+   * @tparam T Тип сервиса
+   *
+   * @note Inline функция, которая применяетс строго внутри макроса генерации
+   * сервисов различной арности.
+   */
+  template <typename T>
+  inline bool addService(Strategy strategy, IFactory *factory) {
+    void *tid = TypeId<T>();
+    if (!factory || _service_count >= KNOT_MAX_SERVICES || find_entry(tid))
+      return false;
+    switch (strategy) {
+    case SINGLETON:
+      return register_singleton<T>(factory);
+      break;
+    case TRANSIENT:
+      return register_transient<T>(factory);
+      break;
+    default:
+      return false;
+    }
+  }
 
 public:
-  template <typename T> void registerService(Strategy strategy) {
-    if (_registry.find(&typeid(T))) {
-      return; // already registered
-    }
-    _registry.insert(&typeid(T), new Descriptor(new Factory<T>(), strategy));
-  }
+  /** @brief Конструктор контейнера
+   * @details Создает контейнер с нулевым счетчиком сервисов и временных
+   * сервисов, а также инициализирует пул памяти с размером 4096 байт.
+   *
+   * @note Если требуется использовать другой размер пула памяти, рекомендуется
+   * использовать конструктор с параметром max_bytes.
+   */
+  Container() : _service_count(0), _transient_count(0), _pool(4096) {}
 
-  // All .registerService declarations are preprocessed by macros
-  // Need to use '--ffunction-sections -fdata-sections' with compiler
-  // and '-Wl --gc-sections' for linker
-  REGISTER_GEN
+  /** @brief Конструктор контейнера с указанием максимального размера пула
+   * памяти
+   * @details Создает контейнер с нулевым счетчиком сервисов и временных
+   * сервисов, а также инициализирует пул памяти с заданным размером.
+   * @param max_bytes Максимальный размер пула памяти в байтах.
+   *
+   * @note Если требуется использовать буфер для пула памяти, рекомендуется
+   * использовать конструктор с указанием буфера и его размера.
+   */
+  explicit Container(size_t max_bytes)
+      : _service_count(0), _transient_count(0), _pool(max_bytes) {}
 
-  static Container &instance() {
-    static Container instance;
-    return instance;
-  }
+  /** @brief Конструктор контейнера с указанием буфера и его размера
+   * @details Создает контейнер с нулевым счетчиком сервисов и временных
+   * сервисов, а также инициализирует пул памяти с заданным буфером и его
+   * размером.
+   * @param buffer Указатель на буфер, который будет использоваться в качестве
+   * пула памяти.
+   * @param buffer_size Размер буфера в байтах.
+   *
+   * @note Если требуется использовать пул памяти без буфера, рекомендуется
+   * использовать конструктор без параметров или с указанием максимального
+   * размера пула памяти.
+   */
+  Container(void *buffer, size_t buffer_size)
+      : _service_count(0), _transient_count(0), _pool(buffer, buffer_size) {}
 
-  // FIXME: gets optimized out by compiler
-  /*
-          static Container &instance() {
-      if (!_instancePtr) {
-        _instancePtr = new Container();
-      }
-      return *_instancePtr;
-    }
-  */
-
+  /** @brief Деструктор контейнера
+   * @details Освобождает все зарегистрированные сервисы и временные сервисы,
+   * вызывая соответствующие методы для уничтожения синглтонов и временных
+   * сервисов.
+   *
+   * @note Этот деструктор вызывается автоматически при уничтожении объекта
+   * Container.
+   */
   ~Container() {
-    for (Registry::size_type i = 0; i < _registry.size(); ++i) {
-      _registry.begin()[i].second->factory->deleteInstance(
-          _registry.begin()[i].second->instance);
-    }
+    destroyAllTransients();
+    destroyAllSingletons();
   }
 
-  // TODO: bless this mess
-  template <typename T> T *resolve() {
-    Descriptor **entry = _registry.find(&typeid(T));
-    if (!entry) {
+  /** @brief Регистрация сервиса в контейнере
+   * @details Этот метод позволяет зарегистрировать сервис в контейнере с
+   * заданной стратегией создания (SINGLETON или TRANSIENT).
+   * @param strategy Стратегия создания сервиса
+   * @tparam T Тип сервиса, который нужно зарегистрировать
+   * @return true, если регистрация успешна, иначе false.
+   *
+   * @note Если сервис уже зарегистрирован, регистрация не будет выполнена.
+   */
+  template <typename T> bool registerService(Strategy strategy) {
+    return addService<T>(strategy, new Factory<T>());
+  }
+
+  REGISTER_GEN // Макрос для регистрации сервисов с различной арностью
+
+      /** @brief Получение зарегистрированного сервиса по его типу
+       * @details Этот метод позволяет получить зарегистрированный сервис по его
+       * типу.
+       * @tparam T Тип сервиса, который нужно получить
+       * @return Указатель на сервис типа T, или nullptr, если сервис не
+       * зарегистрирован или не может быть создан.
+       *
+       * @note Если сервис зарегистрирован как SINGLETON, он будет создан при
+       * первом вызове resolve и сохранен для последующих вызовов. Если сервис
+       * зарегистрирован как TRANSIENT, он будет создан каждый раз при вызове
+       * resolve.
+       */
+      template <typename T>
+      T *resolve() {
+    RegistryEntry *entry = find_entry(TypeId<T>());
+    if (!entry)
+      return nullptr;
+    Descriptor &desc = entry->desc;
+    switch (desc.strategy) {
+    case SINGLETON: {
+      if (!desc.instance)
+        desc.instance = desc.factory->create(desc.storage);
+      return static_cast<T *>(desc.instance);
+    }
+    case TRANSIENT: {
+      if (_transient_count >= KNOT_MAX_TRANSIENTS)
+        return nullptr;
+      size_t size = 0;
+      void *mem = _pool.allocate(sizeof(T), sizeof(void *), &size);
+      if (!mem)
+        return nullptr;
+      T *ptr = static_cast<T *>(desc.factory->create(mem));
+      _transients[_transient_count].factory = desc.factory;
+      _transients[_transient_count].ptr = ptr;
+      _transients[_transient_count].alloc_size = size;
+      ++_transient_count;
+      return ptr;
+    }
+    default:
       return nullptr;
     }
+  }
 
-    if ((*entry)->strategy == Strategy::SINGLETON) {
-      if (!(*entry)->instance) {
-        (*entry)->instance = (*entry)->factory->create();
+  /** @brief Уничтожение всех синглтон сервисов
+   * @note Этот метод освобождает память, занятую всеми синглтон сервисами, и
+   * вызывает их деструкторы.
+   */
+  void destroyAllSingletons() {
+    for (size_t i = 0; i < _service_count; ++i) {
+      Descriptor &desc = _registry[i].desc;
+      if (desc.strategy == SINGLETON && desc.instance) {
+        desc.factory->destroy(desc.instance);
+        desc.instance = nullptr;
       }
-      return static_cast<T *>((*entry)->instance);
-    } else {
-      return static_cast<T *>((*entry)->factory->create());
+    }
+  }
+
+  /** @brief Уничтожение всех временных сервисов
+   * @note Этот метод освобождает память, занятую всеми временными сервисами, и
+   * вызывает их деструкторы.
+   */
+  void destroyAllTransients() {
+    for (size_t i = 0; i < _transient_count; ++i) {
+      if (_transients[i].ptr && _transients[i].factory)
+        _transients[i].factory->destroy(_transients[i].ptr);
+      if (_transients[i].ptr)
+        _pool.deallocate(_transients[i].ptr, _transients[i].alloc_size);
+      _transients[i].ptr = nullptr;
+      _transients[i].alloc_size = 0;
+      _transients[i].factory = nullptr;
+    }
+    _transient_count = 0;
+  }
+
+  /** @brief Уничтожение временного сервиса по указателю
+   * @details Этот метод освобождает память, занятую временным сервисом, и
+   * вызывает его деструктор.
+   * @note Если сервис не найден, ничего не происходит.
+   * @tparam T Тип временного сервиса, который нужно уничтожить
+   * @param ptr Указатель на временный сервис, который нужно уничтожить
+   *
+   * @note Этот метод используется для управления жизненным циклом временных
+   * сервисов, которые были созданы с помощью метода .resolve().
+   */
+  template <typename T> void destroyTransient(T *ptr) {
+    for (size_t i = 0; i < _transient_count; ++i) {
+      if (_transients[i].ptr == ptr) {
+        _transients[i].factory->destroy(ptr);
+        _pool.deallocate(_transients[i].ptr, _transients[i].alloc_size);
+        _transients[i].ptr = nullptr;
+        _transients[i].alloc_size = 0;
+        _transients[i].factory = nullptr;
+        for (size_t j = i + 1; j < _transient_count; ++j)
+          _transients[j - 1] = _transients[j];
+        --_transient_count;
+        break;
+      }
     }
   }
 };

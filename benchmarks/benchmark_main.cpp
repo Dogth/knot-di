@@ -15,21 +15,23 @@ struct ServiceImpl : IService {
 
 static void BM_RegisterService(benchmark::State &state) {
   for (auto _ : state) {
-    // Create a new container for each iteration to avoid duplicate registration
-    Container &c = Container::instance();
-    c.registerService<ServiceImpl>(Strategy::SINGLETON);
+    Container c;
+    c.registerService<ServiceImpl>(TRANSIENT);
   }
 }
 BENCHMARK(BM_RegisterService);
 
 static void BM_ResolveService(benchmark::State &state) {
-  Container &c = Container::instance();
-  c.registerService<ServiceImpl>(Strategy::SINGLETON);
+  Container c;
+  c.registerService<ServiceImpl>(TRANSIENT);
   for (auto _ : state) {
-    IService *svc = c.resolve<IService>();
-    benchmark::DoNotOptimize(svc);
+    c.resolve<ServiceImpl>();
+  }
+  c.destroyAllTransients();
+  for (auto _ : state) {
+    c.resolve<ServiceImpl>();
   }
 }
-BENCHMARK(BM_ResolveService);
+BENCHMARK(BM_ResolveService)->Iterations(16);
 
 BENCHMARK_MAIN();

@@ -31,7 +31,7 @@ public:
       size_t pad = misalign ? (align - misalign) : 0;
 
       if (size + pad > space)
-        return 0;
+        return nullptr;
 
       void *ptr = base + pad;
       if (out_alloc_size)

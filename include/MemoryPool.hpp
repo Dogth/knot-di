@@ -107,7 +107,7 @@ public:
    * может привести к неопределенному поведению.
    */
   void deallocate(void *ptr, size_t size) {
-    if (_buffer != NULL) {
+    if (_buffer != nullptr) {
       return;
     }
     if (ptr) {

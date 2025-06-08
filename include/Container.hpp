@@ -40,13 +40,15 @@ private:
   Container(const Container &);            // Запрет копирования контейнера
   Container &operator=(const Container &); // Запрет присваивания контейнера
 
-  size_t _service_count;   // Количество зарегистрированных сервисов
-  size_t _transient_count; // Количество временных сервисов
+  size_t _service_count = 0;   // Количество зарегистрированных сервисов
+  size_t _factory_count = 0;   // Количество зарегистрированных фабрик
+  size_t _transient_count = 0; // Количество временных сервисов
 
   MemoryPool _pool; // Пул памяти для управления памятью сервисов
 
   RegistryEntry
-      _registry[KNOT_MAX_SERVICES]; // Реестр зарегистрированных сервисов
+      _registry[KNOT_MAX_SERVICES];        // Реестр зарегистрированных сервисов
+  IFactory *_factories[KNOT_MAX_SERVICES]; // Массив фабрик для сервисов
   TransientInfo _transients[KNOT_MAX_TRANSIENTS]; // Массив временных сервисов
 
   /** @brief метод для поиска записи в реестре по идентификатору типа
@@ -128,7 +130,7 @@ public:
    * @note Если требуется использовать другой размер пула памяти, рекомендуется
    * использовать конструктор с параметром max_bytes.
    */
-  Container() : _service_count(0), _transient_count(0), _pool(4096) {}
+  Container() : _pool(4096) {}
 
   /** @brief Конструктор контейнера с указанием максимального размера пула
    * памяти
@@ -139,8 +141,7 @@ public:
    * @note Если требуется использовать буфер для пула памяти, рекомендуется
    * использовать конструктор с указанием буфера и его размера.
    */
-  explicit Container(size_t max_bytes)
-      : _service_count(0), _transient_count(0), _pool(max_bytes) {}
+  explicit Container(size_t max_bytes) : _pool(max_bytes) {}
 
   /** @brief Конструктор контейнера с указанием буфера и его размера
    * @details Создает контейнер с нулевым счетчиком сервисов и временных
@@ -154,8 +155,7 @@ public:
    * использовать конструктор без параметров или с указанием максимального
    * размера пула памяти.
    */
-  Container(void *buffer, size_t buffer_size)
-      : _service_count(0), _transient_count(0), _pool(buffer, buffer_size) {}
+  Container(void *buffer, size_t buffer_size) : _pool(buffer, buffer_size) {}
 
   /** @brief Деструктор контейнера
    * @details Освобождает все зарегистрированные сервисы и временные сервисы,
@@ -178,9 +178,19 @@ public:
    * @return true, если регистрация успешна, иначе false.
    *
    * @note Если сервис уже зарегистрирован, регистрация не будет выполнена.
+   * @note Все сервисы регистрируются через фабрики, которые создаются
+   *	внутри этого метода и хранятся в массиве _factories внутри буфера
+   *контейнера.
    */
   template <typename T> bool registerService(Strategy strategy) {
-    return addService<T>(strategy, new Factory<T>());
+    void *mem = _pool.allocate(sizeof(Factory<T>), sizeof(Factory<T> *));
+    if (!mem)
+      return false;
+    IFactory *factory = new (mem) Factory<T>();
+    if (_factory_count >= KNOT_MAX_SERVICES)
+      return false;
+    _factories[_factory_count++] = factory;
+    return addService<T>(strategy, factory);
   }
 
   REGISTER_GEN // Макрос для регистрации сервисов с различной арностью

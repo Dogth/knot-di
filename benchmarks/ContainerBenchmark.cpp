@@ -2,12 +2,13 @@
 #include <benchmark/benchmark.h>
 
 static void BM_Container_RegisterManySingletons(benchmark::State &state) {
+  struct Dummy {
+    int x;
+  };
+
   for (auto _ : state) {
     Knot::Container c;
     for (int i = 0; i < 32; ++i) {
-      struct Dummy {
-        int x;
-      };
       c.registerService<Dummy>(SINGLETON);
     }
   }

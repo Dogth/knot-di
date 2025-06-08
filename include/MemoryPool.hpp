@@ -2,6 +2,7 @@
 #define MEMORY_POOL_HPP
 
 #include "ContainerMacros.hpp"
+#include <cassert>
 #include <cstddef>
 namespace Knot {
 class MemoryPool {
@@ -53,9 +54,18 @@ public:
     }
   }
   void deallocate(void *ptr, size_t size) {
-    if (_buffer == nullptr && ptr) {
+    if (_buffer != NULL) {
+      assert(false && "deallocate() not supported in buffer-backed pools");
+      return;
+    }
+    if (ptr) {
       operator delete(ptr);
-      _used_bytes -= size;
+      if (_used_bytes < size) {
+        assert(false && "_used_bytes underflow on deallocate!");
+        _used_bytes = 0;
+      } else {
+        _used_bytes -= size;
+      }
     }
   }
 

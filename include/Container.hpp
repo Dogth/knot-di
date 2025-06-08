@@ -15,6 +15,7 @@
 #include "Descriptor.hpp"
 #include "Factory.hpp"
 #include "MemoryPool.hpp"
+#include "Strategy.hpp"
 #include "Util.hpp"
 #include <cstddef>
 
@@ -185,7 +186,7 @@ public:
    *	внутри этого метода и хранятся в массиве _factories внутри буфера
    *контейнера.
    */
-  template <typename T> bool registerService(Strategy strategy) {
+  template <typename T> bool registerService(Strategy strategy = SINGLETON) {
     void *mem = _pool.allocate(sizeof(Factory<T>), sizeof(Factory<T> *));
     if (!mem)
       return false;

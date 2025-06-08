@@ -12,12 +12,39 @@
     (A1, A2, A3), (arg1, arg2, arg3))                                          \
   X(4, (typename A1, typename A2, typename A3, typename A4),                   \
     (A1 arg1, A2 arg2, A3 arg3, A4 arg4), (A1, A2, A3, A4),                    \
-    (arg1, arg2, arg3, arg4))
+    (arg1, arg2, arg3, arg4))                                                  \
+  X(5, (typename A1, typename A2, typename A3, typename A4, typename A5),      \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5), (A1, A2, A3, A4, A5),       \
+    (arg1, arg2, arg3, arg4, arg5))                                            \
+  X(6,                                                                         \
+    (typename A1, typename A2, typename A3, typename A4, typename A5,          \
+     typename A6),                                                             \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6),                    \
+    (A1, A2, A3, A4, A5, A6), (arg1, arg2, arg3, arg4, arg5, arg6))            \
+  X(7,                                                                         \
+    (typename A1, typename A2, typename A3, typename A4, typename A5,          \
+     typename A6, typename A7),                                                \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6, A7 arg7),           \
+    (A1, A2, A3, A4, A5, A6, A7), (arg1, arg2, arg3, arg4, arg5, arg6, arg7))  \
+  X(8,                                                                         \
+    (typename A1, typename A2, typename A3, typename A4, typename A5,          \
+     typename A6, typename A7, typename A8),                                   \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6, A7 arg7, A8 arg8),  \
+    (A1, A2, A3, A4, A5, A6, A7, A8),                                          \
+    (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8))
 
 #define R_GEN(N, TMPL, FUNC, TPS, ARGS)                                        \
   template <typename T, EXPAND TMPL>                                           \
-  void registerService(Strategy strategy, EXPAND FUNC) {                       \
-    addService<T>(strategy, new Factory##N<T, EXPAND TPS>(EXPAND ARGS));       \
+  bool registerService(Strategy strategy, EXPAND FUNC) {                       \
+    void *mem =                                                                \
+        _pool.allocate(sizeof(Factory##N<T, EXPAND TPS>), sizeof(void *));     \
+    if (!mem)                                                                  \
+      return false;                                                            \
+    IFactory *factory = new (mem) Factory##N<T, EXPAND TPS>(EXPAND ARGS);      \
+    if (_factory_count >= KNOT_MAX_SERVICES)                                   \
+      return false;                                                            \
+    _factories[_factory_count++] = factory;                                    \
+    return addService<T>(strategy, factory);                                   \
   }
 
 #define REGISTER_GEN R_ARITY_LIST(R_GEN)
@@ -35,7 +62,37 @@
     (A1 _arg1; A2 _arg2; A3 _arg3; A4 _arg4),                                  \
     (A1 arg1, A2 arg2, A3 arg3, A4 arg4),                                      \
     (_arg1(arg1), _arg2(arg2), _arg3(arg3), _arg4(arg4)),                      \
-    (_arg1, _arg2, _arg3, _arg4))
+    (_arg1, _arg2, _arg3, _arg4))                                              \
+  X(5, (typename A1, typename A2, typename A3, typename A4, typename A5),      \
+    (A1 _arg1; A2 _arg2; A3 _arg3; A4 _arg4; A5 _arg5),                        \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5),                             \
+    (_arg1(arg1), _arg2(arg2), _arg3(arg3), _arg4(arg4), _arg5(arg5)),         \
+    (_arg1, _arg2, _arg3, _arg4, _arg5))                                       \
+  X(6,                                                                         \
+    (typename A1, typename A2, typename A3, typename A4, typename A5,          \
+     typename A6),                                                             \
+    (A1 _arg1; A2 _arg2; A3 _arg3; A4 _arg4; A5 _arg5; A6 _arg6),              \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6),                    \
+    (_arg1(arg1), _arg2(arg2), _arg3(arg3), _arg4(arg4), _arg5(arg5),          \
+     _arg6(arg6)),                                                             \
+    (_arg1, _arg2, _arg3, _arg4, _arg5, _arg6))                                \
+  X(7,                                                                         \
+    (typename A1, typename A2, typename A3, typename A4, typename A5,          \
+     typename A6, typename A7),                                                \
+    (A1 _arg1; A2 _arg2; A3 _arg3; A4 _arg4; A5 _arg5; A6 _arg6; A7 _arg7),    \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6, A7 arg7),           \
+    (_arg1(arg1), _arg2(arg2), _arg3(arg3), _arg4(arg4), _arg5(arg5),          \
+     _arg6(arg6), _arg7(arg7)),                                                \
+    (_arg1, _arg2, _arg3, _arg4, _arg5, _arg6, _arg7))                         \
+  X(8,                                                                         \
+    (typename A1, typename A2, typename A3, typename A4, typename A5,          \
+     typename A6, typename A7, typename A8),                                   \
+    (A1 _arg1; A2 _arg2; A3 _arg3; A4 _arg4; A5 _arg5; A6 _arg6; A7 _arg7;     \
+     A8 _arg8),                                                                \
+    (A1 arg1, A2 arg2, A3 arg3, A4 arg4, A5 arg5, A6 arg6, A7 arg7, A8 arg8),  \
+    (_arg1(arg1), _arg2(arg2), _arg3(arg3), _arg4(arg4), _arg5(arg5),          \
+     _arg6(arg6), _arg7(arg7), _arg8(arg8)),                                   \
+    (_arg1, _arg2, _arg3, _arg4, _arg5, _arg6, _arg7, _arg8))
 
 #define F_GEN(N, TMPL, FIELDS, ARGS, CONSTR, CREATE)                           \
   template <typename T, EXPAND TMPL> class Factory##N : public IFactory {      \

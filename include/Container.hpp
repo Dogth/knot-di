@@ -124,6 +124,17 @@ private:
     }
   }
 
+  inline void destroyAllFactories() {
+    for (size_t i = 0; i < _factory_count; ++i) {
+      if (_factories[i]) {
+        _factories[i]->destroy(_factories[i]);
+        _pool.deallocate(_factories[i], sizeof(IFactory *));
+        _factories[i] = NULL;
+      }
+    }
+    _factory_count = 0;
+  }
+
 public:
   /** @brief Конструктор контейнера
    * @details Создает контейнер с нулевым счетчиком сервисов и временных
@@ -257,7 +268,13 @@ public:
     for (size_t i = 0; i < _service_count; ++i) {
       Descriptor &desc = _registry[i].desc;
       if (desc.strategy == SINGLETON && desc.instance) {
+        size_t alloc_size = sizeof(desc.instance);
         desc.factory->destroy(desc.instance);
+        if (desc.storage) {
+          _pool.deallocate(desc.storage, alloc_size);
+          desc.storage = NULL;
+        }
+
         desc.instance = NULL;
       }
     }

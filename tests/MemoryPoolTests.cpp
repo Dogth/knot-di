@@ -99,3 +99,11 @@ TEST(MemoryPoolTest, BufferDoesNotAffectNearbyMemory) {
         << "Buffer overflow detected at index " << i;
   }
 }
+
+TEST(MemoryPoolTest, DestructorFreesHeapMemory) {
+  size_t max_bytes = 128;
+  Knot::MemoryPool *pool = new Knot::MemoryPool(max_bytes);
+  void *ptr = pool->allocate(64, alignof(int));
+  ASSERT_NE(ptr, nullptr);
+  delete pool; // Should free all memory without leaks or crashes
+}

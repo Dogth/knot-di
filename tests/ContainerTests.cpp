@@ -177,3 +177,39 @@ TEST(ContainerTest, ContainerDoesNotAffectNearbyMemory) {
         << "Container buffer overflow at index " << i;
   }
 }
+
+struct DummySingleton {
+  static int destructed;
+  DummySingleton() = default;
+  ~DummySingleton() { ++destructed; }
+};
+
+struct DummyTransient {
+  static int destructed;
+  DummyTransient() = default;
+  ~DummyTransient() { ++destructed; }
+};
+
+int DummySingleton::destructed = 0;
+int DummyTransient::destructed = 0;
+
+TEST(ContainerTest, DestructorDeletesAllSingletonsAndTransients) {
+
+  int initialSingleton = DummySingleton::destructed = 0;
+  int initialTransient = DummyTransient::destructed = 0;
+
+  {
+    Knot::Container container;
+    container.registerService<DummySingleton>(SINGLETON);
+    container.registerService<DummyTransient>(TRANSIENT);
+    DummySingleton *s = container.resolve<DummySingleton>();
+    (void)s;
+    DummyTransient *t1 = container.resolve<DummyTransient>();
+    DummyTransient *t2 = container.resolve<DummyTransient>();
+    (void)t1;
+    (void)t2;
+  }
+
+  EXPECT_GT(DummySingleton::destructed, initialSingleton);
+  EXPECT_GT(DummyTransient::destructed, initialTransient);
+}

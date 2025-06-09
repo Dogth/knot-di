@@ -188,8 +188,9 @@ public:
    * сервисов.
    */
   ~Container() {
-    destroyAllTransients();
     destroyAllSingletons();
+    destroyAllTransients();
+    destroyAllFactories();
   }
 
   /** @brief Регистрация сервиса в контейнере

@@ -18,6 +18,7 @@
 #include "Strategy.hpp"
 #include "Util.hpp"
 #include <cstddef>
+#include <cstdint>
 
 #ifndef KNOT_MAX_SERVICES
 #define KNOT_MAX_SERVICES 16
@@ -41,9 +42,9 @@ private:
   Container(const Container &);            // Запрет копирования контейнера
   Container &operator=(const Container &); // Запрет присваивания контейнера
 
-  size_t _service_count = 0;   // Количество зарегистрированных сервисов
-  size_t _factory_count = 0;   // Количество зарегистрированных фабрик
-  size_t _transient_count = 0; // Количество временных сервисов
+  size_t _service_count;   // Количество зарегистрированных сервисов
+  size_t _factory_count;   // Количество зарегистрированных фабрик
+  size_t _transient_count; // Количество временных сервисов
 
   MemoryPool _pool; // Пул памяти для управления памятью сервисов
 
@@ -134,7 +135,9 @@ public:
    * @warning Этот конструктор не принимает буфер для пула памяти, поэтому
    * все выделения будут происходить в динамической памяти.
    */
-  Container() : _pool(4096) {}
+  Container()
+      : _transient_count(0), _factory_count(0), _service_count(0), _pool(4096) {
+  }
 
   /** @brief Конструктор контейнера с указанием максимального размера пула
    * памяти
@@ -148,7 +151,9 @@ public:
    * @warning Этот конструктор не принимает буфер для пула памяти, поэтому
    * все выделения будут происходить в динамической памяти.
    */
-  explicit Container(size_t max_bytes) : _pool(max_bytes) {}
+  explicit Container(size_t max_bytes)
+      : _transient_count(0), _factory_count(0), _service_count(0),
+        _pool(max_bytes) {}
 
   /** @brief Конструктор контейнера с указанием буфера и его размера
    * @details Создает контейнер с нулевым счетчиком сервисов и временных
@@ -162,7 +167,9 @@ public:
    * использовать конструктор без параметров или с указанием максимального
    * размера пула памяти.
    */
-  Container(void *buffer, size_t buffer_size) : _pool(buffer, buffer_size) {}
+  Container(void *buffer, size_t buffer_size)
+      : _transient_count(0), _factory_count(0), _service_count(0),
+        _pool(buffer, buffer_size) {}
 
   /** @brief Деструктор контейнера
    * @details Освобождает все зарегистрированные сервисы и временные сервисы,
@@ -187,7 +194,7 @@ public:
    *контейнера.
    */
   template <typename T> bool registerService(Strategy strategy = SINGLETON) {
-    void *mem = _pool.allocate(sizeof(Factory<T>), sizeof(Factory<T> *));
+    uint8_t *mem = _pool.allocate(sizeof(Factory<T>), sizeof(Factory<T> *));
     if (!mem)
       return false;
     IFactory *factory = new (mem) Factory<T>();
@@ -220,7 +227,8 @@ public:
     switch (desc.strategy) {
     case SINGLETON: {
       if (!desc.instance)
-        desc.instance = desc.factory->create(desc.storage);
+        desc.instance =
+            desc.factory->create(static_cast<uint8_t *>(desc.storage));
       return static_cast<T *>(desc.instance);
     }
     case TRANSIENT: {
@@ -230,7 +238,8 @@ public:
       void *mem = _pool.allocate(sizeof(T), sizeof(void *), &size);
       if (!mem)
         return NULL;
-      T *ptr = static_cast<T *>(desc.factory->create(mem));
+      T *ptr =
+          static_cast<T *>(desc.factory->create(static_cast<uint8_t *>(mem)));
       _transients[_transient_count].factory = desc.factory;
       _transients[_transient_count].ptr = ptr;
       _transients[_transient_count].alloc_size = size;

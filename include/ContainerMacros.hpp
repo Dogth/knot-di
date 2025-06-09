@@ -63,7 +63,7 @@
 #define R_GEN(N, TMPL, FUNC, TPS, ARGS)                                        \
   template <typename T, EXPAND TMPL>                                           \
   bool registerService(Strategy strategy, EXPAND FUNC) {                       \
-    void *mem =                                                                \
+    uint8_t *mem =                                                             \
         _pool.allocate(sizeof(Factory##N<T, EXPAND TPS>), sizeof(void *));     \
     if (!mem)                                                                  \
       return false;                                                            \
@@ -147,7 +147,7 @@
                                                                                \
   public:                                                                      \
     Factory##N(EXPAND ARGS) : EXPAND CONSTR {}                                 \
-    virtual void *create(void *buffer) {                                       \
+    virtual void *create(uint8_t *buffer) {                                    \
       return buffer ? new (buffer) T(EXPAND CREATE) : new T(EXPAND CREATE);    \
     }                                                                          \
     void destroy(void *instance) {                                             \

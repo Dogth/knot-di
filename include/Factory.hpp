@@ -10,6 +10,8 @@
 #define FACTORY_HPP
 
 #include "ContainerMacros.hpp"
+#include <cstdint>
+
 namespace Knot {
 /** @brief Интерфейс для фабрик, создающих и уничтожающих экземпляры сервисов
  * @details Этот интерфейс определяет методы для создания и уничтожения
@@ -19,7 +21,7 @@ namespace Knot {
 class IFactory {
 public:
   virtual ~IFactory() {};
-  virtual void *create(void *buffer) = 0;
+  virtual void *create(uint8_t *buffer) = 0;
   virtual void destroy(void *instance) = 0;
 };
 
@@ -39,7 +41,7 @@ public:
  */
 template <typename T> class Factory : public IFactory {
 public:
-  void *create(void *buffer) { return buffer ? new (buffer) T() : new T(); }
+  void *create(uint8_t *buffer) { return buffer ? new (buffer) T() : new T(); }
   void destroy(void *instance) {
     if (instance)
       static_cast<T *>(instance)->~T();

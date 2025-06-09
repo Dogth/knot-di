@@ -11,6 +11,7 @@
 #define MEMORY_POOL_HPP
 
 #include <cstddef>
+#include <cstdint>
 namespace Knot {
 /** @brief Класс MemoryPool для управления памятью
  *
@@ -35,7 +36,7 @@ public:
    * @param max_bytes Максимальный размер пула памяти в байтах.
    */
   MemoryPool(size_t max_bytes)
-      : _buffer(nullptr), _used_bytes(0), _max_bytes(max_bytes),
+      : _buffer(NULL), _used_bytes(0), _max_bytes(max_bytes),
         _buffer_offset(0) {}
 
   /** @brief Конструктор MemoryPool с указанием буфера и его размера
@@ -59,9 +60,9 @@ public:
    * размер выделенного блока памяти. Если указатель равен nullptr,
    * то размер не будет возвращен.
    */
-  void *allocate(size_t size, size_t align, size_t *out_alloc_size = 0) {
+  uint8_t *allocate(size_t size, size_t align, size_t *out_alloc_size = 0) {
     if (size == 0)
-      return nullptr;
+      return NULL;
     if (_buffer) {
       char *base = static_cast<char *>(_buffer) + _buffer_offset;
       size_t space = _max_bytes - _buffer_offset;
@@ -69,9 +70,9 @@ public:
       size_t pad = misalign ? (align - misalign) : 0;
 
       if (size + pad > space)
-        return nullptr;
+        return NULL;
 
-      void *ptr = base + pad;
+      uint8_t *ptr = reinterpret_cast<uint8_t *>(base + pad);
       if (out_alloc_size)
         *out_alloc_size = size + pad;
       _buffer_offset += size + pad;
@@ -79,15 +80,15 @@ public:
       return ptr;
     } else {
       if (_used_bytes + size > _max_bytes || size == 0)
-        return nullptr;
-      void *ptr = operator new(size);
+        return NULL;
+      uint8_t *ptr = reinterpret_cast<uint8_t *>(operator new(size));
       if (ptr) {
         if (out_alloc_size)
           *out_alloc_size = size;
         _used_bytes += size;
         return ptr;
       }
-      return nullptr;
+      return NULL;
     }
   }
 
@@ -107,7 +108,7 @@ public:
    * может привести к неопределенному поведению.
    */
   void deallocate(void *ptr, size_t size) {
-    if (_buffer != nullptr) {
+    if (_buffer != NULL) {
       return;
     }
     if (ptr) {

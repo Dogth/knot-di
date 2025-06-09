@@ -60,7 +60,7 @@ private:
     for (size_t i = 0; i < _service_count; ++i)
       if (_registry[i].type == tid)
         return &_registry[i];
-    return nullptr;
+    return NULL;
   }
 
   /** @brief метод для регистрации синглтон сервиса
@@ -77,7 +77,7 @@ private:
     entry.type = TypeId<T>();
     entry.desc.factory = factory;
     entry.desc.strategy = SINGLETON;
-    entry.desc.instance = nullptr;
+    entry.desc.instance = NULL;
     entry.desc.storage = mem;
     return true;
   }
@@ -92,8 +92,8 @@ private:
     entry.type = TypeId<T>();
     entry.desc.factory = factory;
     entry.desc.strategy = TRANSIENT;
-    entry.desc.instance = nullptr;
-    entry.desc.storage = nullptr;
+    entry.desc.instance = NULL;
+    entry.desc.storage = NULL;
     return true;
   }
 
@@ -215,7 +215,7 @@ public:
       T *resolve() {
     RegistryEntry *entry = find_entry(TypeId<T>());
     if (!entry)
-      return nullptr;
+      return NULL;
     Descriptor &desc = entry->desc;
     switch (desc.strategy) {
     case SINGLETON: {
@@ -225,11 +225,11 @@ public:
     }
     case TRANSIENT: {
       if (_transient_count >= KNOT_MAX_TRANSIENTS)
-        return nullptr;
+        return NULL;
       size_t size = 0;
       void *mem = _pool.allocate(sizeof(T), sizeof(void *), &size);
       if (!mem)
-        return nullptr;
+        return NULL;
       T *ptr = static_cast<T *>(desc.factory->create(mem));
       _transients[_transient_count].factory = desc.factory;
       _transients[_transient_count].ptr = ptr;
@@ -238,7 +238,7 @@ public:
       return ptr;
     }
     default:
-      return nullptr;
+      return NULL;
     }
   }
 
@@ -251,7 +251,7 @@ public:
       Descriptor &desc = _registry[i].desc;
       if (desc.strategy == SINGLETON && desc.instance) {
         desc.factory->destroy(desc.instance);
-        desc.instance = nullptr;
+        desc.instance = NULL;
       }
     }
   }
@@ -266,9 +266,9 @@ public:
         _transients[i].factory->destroy(_transients[i].ptr);
       if (_transients[i].ptr)
         _pool.deallocate(_transients[i].ptr, _transients[i].alloc_size);
-      _transients[i].ptr = nullptr;
+      _transients[i].ptr = NULL;
       _transients[i].alloc_size = 0;
-      _transients[i].factory = nullptr;
+      _transients[i].factory = NULL;
     }
     _transient_count = 0;
   }
@@ -288,9 +288,9 @@ public:
       if (_transients[i].ptr == ptr) {
         _transients[i].factory->destroy(ptr);
         _pool.deallocate(_transients[i].ptr, _transients[i].alloc_size);
-        _transients[i].ptr = nullptr;
+        _transients[i].ptr = NULL;
         _transients[i].alloc_size = 0;
-        _transients[i].factory = nullptr;
+        _transients[i].factory = NULL;
         for (size_t j = i + 1; j < _transient_count; ++j)
           _transients[j - 1] = _transients[j];
         --_transient_count;

@@ -18,7 +18,7 @@
 #include "Strategy.hpp"
 #include "Util.hpp"
 #include <cstddef>
-#include <cstdint>
+#include <new>
 
 #ifndef KNOT_MAX_SERVICES
 #define KNOT_MAX_SERVICES 16
@@ -194,7 +194,7 @@ public:
    *контейнера.
    */
   template <typename T> bool registerService(Strategy strategy = SINGLETON) {
-    uint8_t *mem = _pool.allocate(sizeof(Factory<T>), sizeof(Factory<T> *));
+    void *mem = _pool.allocate(sizeof(Factory<T>), sizeof(Factory<T> *));
     if (!mem)
       return false;
     IFactory *factory = new (mem) Factory<T>();
@@ -227,8 +227,7 @@ public:
     switch (desc.strategy) {
     case SINGLETON: {
       if (!desc.instance)
-        desc.instance =
-            desc.factory->create(static_cast<uint8_t *>(desc.storage));
+        desc.instance = desc.factory->create(desc.storage);
       return static_cast<T *>(desc.instance);
     }
     case TRANSIENT: {
@@ -238,8 +237,7 @@ public:
       void *mem = _pool.allocate(sizeof(T), sizeof(void *), &size);
       if (!mem)
         return NULL;
-      T *ptr =
-          static_cast<T *>(desc.factory->create(static_cast<uint8_t *>(mem)));
+      T *ptr = static_cast<T *>(desc.factory->create(mem));
       _transients[_transient_count].factory = desc.factory;
       _transients[_transient_count].ptr = ptr;
       _transients[_transient_count].alloc_size = size;

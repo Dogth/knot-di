@@ -60,11 +60,11 @@ public:
    * размер выделенного блока памяти. Если указатель равен nullptr,
    * то размер не будет возвращен.
    */
-  uint8_t *allocate(size_t size, size_t align, size_t *out_alloc_size = 0) {
+  void *allocate(size_t size, size_t align, size_t *out_alloc_size = 0) {
     if (size == 0)
       return NULL;
     if (_buffer) {
-      char *base = static_cast<char *>(_buffer) + _buffer_offset;
+      uint8_t *base = static_cast<uint8_t *>(_buffer) + _buffer_offset;
       size_t space = _max_bytes - _buffer_offset;
       size_t misalign = reinterpret_cast<size_t>(base) % align;
       size_t pad = misalign ? (align - misalign) : 0;
@@ -72,7 +72,7 @@ public:
       if (size + pad > space)
         return NULL;
 
-      uint8_t *ptr = reinterpret_cast<uint8_t *>(base + pad);
+      void *ptr = reinterpret_cast<void *>(base + pad);
       if (out_alloc_size)
         *out_alloc_size = size + pad;
       _buffer_offset += size + pad;
@@ -81,7 +81,7 @@ public:
     } else {
       if (_used_bytes + size > _max_bytes || size == 0)
         return NULL;
-      uint8_t *ptr = reinterpret_cast<uint8_t *>(operator new(size));
+      void *ptr = reinterpret_cast<void *>(operator new(size));
       if (ptr) {
         if (out_alloc_size)
           *out_alloc_size = size;

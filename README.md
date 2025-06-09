@@ -1,4 +1,4 @@
-# Knot-DI
+# Knot-DI 🪢
 
 Библиотека для инъекции зависимостей на C++ нацеленная на встраиваемые системы
 
@@ -19,7 +19,7 @@ container.register<IMyService>();
 container.register<IRepository>(TRANSIENT, "repository");
 
 IMyService *service = container.resolve<IMyService>();
-IMyRepository *repository = container.resolve<IRepository>();
+IRepository *repository = container.resolve<IRepository>();
 
 ```
 

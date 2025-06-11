@@ -20,15 +20,15 @@ namespace Knot {
  * а также управлять размером пула.
  */
 class MemoryPool {
-private:
-  size_t _used_bytes;    // Количество использованных байт в пуле памяти
-  size_t _max_bytes;     // Максимальный размер пула памяти
-  size_t _buffer_offset; // Смещение в буфере, где начинается следующий
-                         // доступный блок памяти
+ private:
+  size_t _used_bytes;     // Количество использованных байт в пуле памяти
+  size_t _max_bytes;      // Максимальный размер пула памяти
+  size_t _buffer_offset;  // Смещение в буфере, где начинается следующий
+                          // доступный блок памяти
 
-  void *_buffer; // Указатель на буфер, используемый в качестве пула памяти
+  void* _buffer;  // Указатель на буфер, используемый в качестве пула памяти
 
-public:
+ public:
   /** @brief Конструктор MemoryPool без параметров
    * @details Создает пул памяти с максимальным размером,
    * заданным в параметре max_bytes.
@@ -36,7 +36,9 @@ public:
    * @param max_bytes Максимальный размер пула памяти в байтах.
    */
   MemoryPool(size_t max_bytes)
-      : _buffer(NULL), _used_bytes(0), _max_bytes(max_bytes),
+      : _buffer(NULL),
+        _used_bytes(0),
+        _max_bytes(max_bytes),
         _buffer_offset(0) {}
 
   /** @brief Конструктор MemoryPool с указанием буфера и его размера
@@ -46,8 +48,10 @@ public:
    * пула памяти.
    * @param buffer_size Размер буфера в байтах.
    */
-  MemoryPool(void *buffer, size_t buffer_size)
-      : _buffer(buffer), _used_bytes(0), _max_bytes(buffer_size),
+  MemoryPool(void* buffer, size_t buffer_size)
+      : _buffer(buffer),
+        _used_bytes(0),
+        _max_bytes(buffer_size),
         _buffer_offset(0) {}
 
   /** @brief Метод для выделения памяти из пула
@@ -60,31 +64,26 @@ public:
    * размер выделенного блока памяти. Если указатель равен nullptr,
    * то размер не будет возвращен.
    */
-  void *allocate(size_t size, size_t align, size_t *out_alloc_size = 0) {
-    if (size == 0)
-      return NULL;
+  void* allocate(size_t size, size_t align, size_t* out_alloc_size = 0) {
+    if (size == 0) return NULL;
     if (_buffer) {
-      uint8_t *base = static_cast<uint8_t *>(_buffer) + _buffer_offset;
+      uint8_t* base = static_cast<uint8_t*>(_buffer) + _buffer_offset;
       size_t space = _max_bytes - _buffer_offset;
       size_t misalign = reinterpret_cast<size_t>(base) % align;
       size_t pad = misalign ? (align - misalign) : 0;
 
-      if (size + pad > space)
-        return NULL;
+      if (size + pad > space) return NULL;
 
-      void *ptr = reinterpret_cast<void *>(base + pad);
-      if (out_alloc_size)
-        *out_alloc_size = size + pad;
+      void* ptr = reinterpret_cast<void*>(base + pad);
+      if (out_alloc_size) *out_alloc_size = size + pad;
       _buffer_offset += size + pad;
       _used_bytes += size + pad;
       return ptr;
     } else {
-      if (_used_bytes + size > _max_bytes || size == 0)
-        return NULL;
-      void *ptr = reinterpret_cast<void *>(operator new(size));
+      if (_used_bytes + size > _max_bytes || size == 0) return NULL;
+      void* ptr = reinterpret_cast<void*>(operator new(size));
       if (ptr) {
-        if (out_alloc_size)
-          *out_alloc_size = size;
+        if (out_alloc_size) *out_alloc_size = size;
         _used_bytes += size;
         return ptr;
       }
@@ -107,7 +106,7 @@ public:
    * из пула памяти. Освобождение памяти, которая не была выделена из пула,
    * может привести к неопределенному поведению.
    */
-  void deallocate(void *ptr, size_t size) {
+  void deallocate(void* ptr, size_t size) {
     if (_buffer != NULL) {
       return;
     }
@@ -145,7 +144,7 @@ public:
    * в качестве пула памяти. Если буфер не задан, возвращается nullptr.
    * @return Указатель на буфер пула памяти или nullptr, если буфер не задан.
    */
-  void *getBuffer() const { return _buffer; }
+  void* getBuffer() const { return _buffer; }
 
   /** @brief Получение смещения в буфере, где начинается следующий доступный
    * блок памяти
@@ -156,6 +155,6 @@ public:
    */
   size_t getBufferOffset() const { return _buffer_offset; }
 };
-} // namespace Knot
+}  // namespace Knot
 
-#endif // MEMORY_POOL_HPP
+#endif  // MEMORY_POOL_HPP

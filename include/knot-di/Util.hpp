@@ -9,8 +9,9 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
-#include "Descriptor.hpp"
 #include <cstddef>
+
+#include "Descriptor.hpp"
 
 namespace Knot {
 /** @brief Функция для получения уникального идентификатора типа
@@ -21,9 +22,10 @@ namespace Knot {
  * @tparam T Тип, для которого нужно получить уникальный идентификатор.
  * @return Указатель на уникальный идентификатор типа T.
  */
-template <typename T> void *TypeId() {
-  static char id; // Статическая переменная, уникальная для каждого типа T
-  return &id;     // Возвращаем указатель на уникальный идентификатор типа
+template <typename T>
+void* TypeId() {
+  static char id;  // Статическая переменная, уникальная для каждого типа T
+  return &id;      // Возвращаем указатель на уникальный идентификатор типа
 }
 
 /** @brief Структура для хранения информации о временных сервисах
@@ -32,9 +34,9 @@ template <typename T> void *TypeId() {
  * экземпляр, и размер выделенной памяти.
  */
 struct TransientInfo {
-  void *ptr;         // Указатель на экземпляр временного сервиса
-  IFactory *factory; // Указатель на фабрику, которая создает этот экземпляр
-  size_t alloc_size; // Размер выделенной памяти для этого экземпляра
+  void* ptr;          // Указатель на экземпляр временного сервиса
+  IFactory* factory;  // Указатель на фабрику, которая создает этот экземпляр
+  size_t alloc_size;  // Размер выделенной памяти для этого экземпляра
 };
 
 /** @brief Структура для хранения информации о сервисах в реестре
@@ -43,9 +45,9 @@ struct TransientInfo {
  * о фабрике, стратегии создания и экземпляре.
  */
 struct RegistryEntry {
-  void *type;      // Указатель на уникальный идентификатор типа сервиса
-  Descriptor desc; // Дескриптор, содержащий информацию о сервисе
+  void* type;       // Указатель на уникальный идентификатор типа сервиса
+  Descriptor desc;  // Дескриптор, содержащий информацию о сервисе
 };
-}; // namespace Knot
+};  // namespace Knot
 
-#endif // TYPE_ID_HPP
+#endif  // TYPE_ID_HPP

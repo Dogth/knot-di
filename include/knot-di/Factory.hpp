@@ -9,8 +9,9 @@
 #ifndef FACTORY_HPP
 #define FACTORY_HPP
 
-#include "ContainerMacros.hpp"
 #include <new>
+
+#include "ContainerMacros.hpp"
 
 namespace Knot {
 /** @brief Интерфейс для фабрик, создающих и уничтожающих экземпляры сервисов
@@ -19,10 +20,10 @@ namespace Knot {
  * сервисов в контейнере Knot.
  */
 class IFactory {
-public:
+ public:
   virtual ~IFactory() {};
-  virtual void *create(void *buffer) = 0;
-  virtual void destroy(void *instance) = 0;
+  virtual void* create(void* buffer) = 0;
+  virtual void destroy(void* instance) = 0;
 };
 
 /** @brief Фабрика для создания и уничтожения экземпляров сервисов
@@ -39,17 +40,17 @@ public:
  * FACTORY_GEN, который позволяет создавать фабрики с различным количеством
  * аргументов.
  */
-template <typename T> class Factory : public IFactory {
-public:
-  void *create(void *buffer) { return buffer ? new (buffer) T() : new T(); }
-  void destroy(void *instance) {
-    if (instance)
-      static_cast<T *>(instance)->~T();
+template <typename T>
+class Factory : public IFactory {
+ public:
+  void* create(void* buffer) { return buffer ? new (buffer) T() : new T(); }
+  void destroy(void* instance) {
+    if (instance) static_cast<T*>(instance)->~T();
   }
 };
 
-FACTORY_GEN // Макрос для генерации фабрик с различной арностью
+FACTORY_GEN  // Макрос для генерации фабрик с различной арностью
 
-}; // namespace Knot
+};  // namespace Knot
 
-#endif // FACTORY_HPP
+#endif  // FACTORY_HPP

@@ -19,6 +19,6 @@
  * TRANSIENT - сервис, который создается каждый раз при запросе
  * и уничтожается после использования.
  */
-enum Strategy { SINGLETON, TRANSIENT };
+enum Strategy { SINGLETON, TRANSIENT, EXTERNAL, SCOPED };
 
-#endif // STRATEGY_HPP
+#endif  // STRATEGY_HPP

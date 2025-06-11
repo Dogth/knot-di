@@ -1,10 +1,12 @@
-#include "../include/MemoryPool.hpp"
-#include <cassert>
 #include <gtest/gtest.h>
+
+#include <cassert>
+
+#include "../include/knot-di/MemoryPool.hpp"
 
 TEST(MemoryPoolTest, AllocateAndDeallocate) {
   Knot::MemoryPool pool(128);
-  void *ptr1 = pool.allocate(32, alignof(int));
+  void* ptr1 = pool.allocate(32, alignof(int));
   ASSERT_NE(ptr1, nullptr);
   EXPECT_GE(pool.getUsedBytes(), 32);
 
@@ -15,32 +17,32 @@ TEST(MemoryPoolTest, AllocateAndDeallocate) {
 TEST(MemoryPoolTest, BufferOverflow) {
   char buffer[64];
   Knot::MemoryPool pool(buffer, sizeof(buffer));
-  void *ptr1 = pool.allocate(60, alignof(int));
+  void* ptr1 = pool.allocate(60, alignof(int));
   ASSERT_NE(ptr1, nullptr);
 
-  void *ptr2 = pool.allocate(8, alignof(int));
-  EXPECT_EQ(ptr2, nullptr); // Should fail due to overflow
+  void* ptr2 = pool.allocate(8, alignof(int));
+  EXPECT_EQ(ptr2, nullptr);  // Should fail due to overflow
 }
 
 TEST(MemoryPoolTest, Alignment) {
   char buffer[64];
   Knot::MemoryPool pool(buffer, sizeof(buffer));
-  void *ptr = pool.allocate(16, 16);
+  void* ptr = pool.allocate(16, 16);
   ASSERT_NE(ptr, nullptr);
   EXPECT_EQ(reinterpret_cast<uintptr_t>(ptr) % 16, 0);
 }
 
 TEST(MemoryPoolTest, ZeroSizeAllocation) {
   Knot::MemoryPool pool(64);
-  void *ptr = pool.allocate(0, alignof(int));
+  void* ptr = pool.allocate(0, alignof(int));
   EXPECT_EQ(ptr, nullptr);
   EXPECT_EQ(pool.getUsedBytes(), 0);
 }
 
 TEST(MemoryPoolTest, MultipleAllocationsAndDeallocations) {
   Knot::MemoryPool pool(128);
-  void *ptr1 = pool.allocate(32, alignof(int));
-  void *ptr2 = pool.allocate(32, alignof(int));
+  void* ptr1 = pool.allocate(32, alignof(int));
+  void* ptr2 = pool.allocate(32, alignof(int));
   ASSERT_NE(ptr1, nullptr);
   ASSERT_NE(ptr2, nullptr);
   EXPECT_GE(pool.getUsedBytes(), 64);
@@ -53,21 +55,21 @@ TEST(MemoryPoolTest, MultipleAllocationsAndDeallocations) {
 
 TEST(MemoryPoolTest, HeapOverflow) {
   Knot::MemoryPool pool(32);
-  void *ptr1 = pool.allocate(32, alignof(int));
+  void* ptr1 = pool.allocate(32, alignof(int));
   ASSERT_NE(ptr1, nullptr);
-  void *ptr2 = pool.allocate(1, alignof(int));
+  void* ptr2 = pool.allocate(1, alignof(int));
   EXPECT_EQ(ptr2, nullptr);
 }
 
 TEST(MemoryPoolTest, ResetFunctionality) {
   char buffer[64];
   Knot::MemoryPool pool(buffer, sizeof(buffer));
-  void *ptr1 = pool.allocate(32, alignof(int));
+  void* ptr1 = pool.allocate(32, alignof(int));
   ASSERT_NE(ptr1, nullptr);
   pool.reset();
   EXPECT_EQ(pool.getUsedBytes(), 0);
   EXPECT_EQ(pool.getBufferOffset(), 0);
-  void *ptr2 = pool.allocate(64, alignof(int));
+  void* ptr2 = pool.allocate(64, alignof(int));
   ASSERT_NE(ptr2, nullptr);
 }
 
@@ -85,7 +87,7 @@ TEST(MemoryPoolTest, BufferDoesNotAffectNearbyMemory) {
   std::fill_n(after, sizeof(after), 0xBB);
 
   Knot::MemoryPool pool(buffer, sizeof(buffer));
-  void *ptr = pool.allocate(32, alignof(int));
+  void* ptr = pool.allocate(32, alignof(int));
   ASSERT_NE(ptr, nullptr);
 
   std::memset(ptr, 0xCC, 32);
@@ -102,8 +104,8 @@ TEST(MemoryPoolTest, BufferDoesNotAffectNearbyMemory) {
 
 TEST(MemoryPoolTest, DestructorFreesHeapMemory) {
   size_t max_bytes = 128;
-  Knot::MemoryPool *pool = new Knot::MemoryPool(max_bytes);
-  void *ptr = pool->allocate(64, alignof(int));
+  Knot::MemoryPool* pool = new Knot::MemoryPool(max_bytes);
+  void* ptr = pool->allocate(64, alignof(int));
   ASSERT_NE(ptr, nullptr);
-  delete pool; // Should free all memory without leaks or crashes
+  delete pool;  // Should free all memory without leaks or crashes
 }

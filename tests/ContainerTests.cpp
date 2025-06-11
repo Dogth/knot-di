@@ -1,6 +1,9 @@
-#include "../include/Container.hpp"
-#include <cassert>
 #include <gtest/gtest.h>
+
+#include <cassert>
+#include <cstdio>
+
+#include "../include/knot-di/Container.hpp"
 
 TEST(ContainerTest, RegisterAndResolveSingleton) {
   struct Dummy {
@@ -10,8 +13,8 @@ TEST(ContainerTest, RegisterAndResolveSingleton) {
   Knot::Container container;
   container.registerService<Dummy>(SINGLETON);
 
-  Dummy *service1 = container.resolve<Dummy>();
-  Dummy *service2 = container.resolve<Dummy>();
+  Dummy* service1 = container.resolve<Dummy>();
+  Dummy* service2 = container.resolve<Dummy>();
 
   ASSERT_NE(service1, nullptr);
   ASSERT_EQ(service1, service2);
@@ -26,8 +29,8 @@ TEST(ContainerTest, RegisterAndResolveTransient) {
   Knot::Container container;
   container.registerService<Dummy>(TRANSIENT);
 
-  Dummy *service1 = container.resolve<Dummy>();
-  Dummy *service2 = container.resolve<Dummy>();
+  Dummy* service1 = container.resolve<Dummy>();
+  Dummy* service2 = container.resolve<Dummy>();
 
   ASSERT_NE(service1, nullptr);
   ASSERT_NE(service2, nullptr);
@@ -45,7 +48,7 @@ TEST(ContainerTest, RegisterWithArgAndResolve) {
   Knot::Container container;
   container.registerService<Dummy>(SINGLETON, 99);
 
-  Dummy *service = container.resolve<Dummy>();
+  Dummy* service = container.resolve<Dummy>();
   ASSERT_NE(service, nullptr);
   EXPECT_EQ(service->x, 99);
 }
@@ -54,7 +57,7 @@ TEST(ContainerTest, ResolveUnregisteredService) {
   struct Dummy {};
 
   Knot::Container container;
-  Dummy *dummy = container.resolve<Dummy>();
+  Dummy* dummy = container.resolve<Dummy>();
   ASSERT_EQ(dummy, nullptr);
 }
 
@@ -70,8 +73,8 @@ TEST(ContainerTest, RegisterMultipleServices) {
   container.registerService<DummyS>(SINGLETON);
   container.registerService<DummyT>(TRANSIENT);
 
-  DummyS *s = container.resolve<DummyS>();
-  DummyT *t = container.resolve<DummyT>();
+  DummyS* s = container.resolve<DummyS>();
+  DummyT* t = container.resolve<DummyT>();
 
   ASSERT_NE(s, nullptr);
   ASSERT_NE(t, nullptr);
@@ -86,11 +89,11 @@ TEST(ContainerTest, DestroyAllSingletons) {
 
   Knot::Container container;
   container.registerService<Dummy>(SINGLETON);
-  Dummy *s = container.resolve<Dummy>();
+  Dummy* s = container.resolve<Dummy>();
   ASSERT_NE(s, nullptr);
   container.destroyAllSingletons();
 
-  Dummy *s2 = container.resolve<Dummy>();
+  Dummy* s2 = container.resolve<Dummy>();
   ASSERT_NE(s2, nullptr);
   EXPECT_EQ(s2->x, 42);
 }
@@ -102,11 +105,11 @@ TEST(ContainerTest, DestroyAllTransient) {
 
   Knot::Container container;
   container.registerService<Dummy>(TRANSIENT);
-  Dummy *t1 = container.resolve<Dummy>();
-  Dummy *t3 = container.resolve<Dummy>();
+  Dummy* t1 = container.resolve<Dummy>();
+  Dummy* t3 = container.resolve<Dummy>();
   ASSERT_NE(t1, nullptr);
   container.destroyAllTransients();
-  Dummy *t2 = container.resolve<Dummy>();
+  Dummy* t2 = container.resolve<Dummy>();
   ASSERT_NE(t2, nullptr);
   EXPECT_EQ(t2->x, 42);
   EXPECT_NE(t1, t2);
@@ -117,25 +120,84 @@ TEST(ContainerTest, DependencyInjectionWorks) {
     int x = 42;
   };
   struct Consumer {
-    Dep *dep;
-    Consumer(Dep *d) : dep(d) {}
+    Dep* dep;
+    Consumer(Dep* d) : dep(d) {}
   };
 
   Knot::Container container;
   container.registerService<Dep>(SINGLETON);
   container.registerService<Consumer>(TRANSIENT, container.resolve<Dep>());
 
-  Consumer *consumer1 = container.resolve<Consumer>();
-  Consumer *consumer2 = container.resolve<Consumer>();
+  Consumer* consumer1 = container.resolve<Consumer>();
+  Consumer* consumer2 = container.resolve<Consumer>();
   ASSERT_NE(consumer1, nullptr);
   ASSERT_NE(consumer2, nullptr);
   ASSERT_NE(consumer1, consumer2);
   EXPECT_EQ(consumer1->dep, consumer2->dep);
   EXPECT_EQ(consumer1->dep->x, 42);
   EXPECT_EQ(consumer2->dep->x, 42);
-  Dep *dep = container.resolve<Dep>();
+  Dep* dep = container.resolve<Dep>();
   ASSERT_EQ(consumer1->dep, dep);
   ASSERT_EQ(consumer2->dep, dep);
+}
+
+TEST(ContainerTest, RegisterInstanceWorks) {
+  struct Dummy {
+    int x;
+    Dummy(int v) : x(v) {}
+  };
+  Dummy d(420);
+  Knot::Container container;
+  ASSERT_TRUE(container.registerInstance<Dummy>(&d));
+  Dummy* resolved = container.resolve<Dummy>();
+  ASSERT_EQ(resolved, &d);
+  EXPECT_EQ(resolved->x, 420);
+}
+
+TEST(ContainerTest, RegisterInstanceBadInput) {
+  struct Dummy {};
+  Knot::Container container;
+  EXPECT_FALSE(container.registerInstance<Dummy>(nullptr));
+
+  Dummy d;
+  EXPECT_TRUE(container.registerInstance<Dummy>(&d));
+  EXPECT_FALSE(container.registerInstance<Dummy>(&d));
+}
+
+TEST(ContainerTest, RegisterInstanceArrayWorks) {
+  struct Entity {
+    int id;
+    Entity(int i) : id(i) {}
+  };
+  Entity entities[4] = {Entity(10), Entity(20), Entity(30), Entity(40)};
+  Knot::Container container;
+  ASSERT_TRUE(container.registerInstance<Entity[4]>(&entities));
+  Entity(*resolved)[4] = container.resolve<Entity[4]>();
+  ASSERT_NE(resolved, nullptr);
+  for (int i = 0; i < 4; ++i) {
+    EXPECT_EQ((*resolved)[i].id, entities[i].id);
+  }
+}
+
+TEST(ContainerTest, RegisterInstanceArrayBadInput) {
+  struct Entity {
+    int id;
+  };
+  Knot::Container container;
+  EXPECT_FALSE(container.registerInstance<Entity[3]>(nullptr));
+  Entity arr[3] = {{1}, {2}, {3}};
+  EXPECT_TRUE(container.registerInstance<Entity[3]>(&arr));
+  EXPECT_FALSE(container.registerInstance<Entity[3]>(&arr));
+}
+
+TEST(ContainerTest, RegisterServiceBadInput) {
+  struct Dummy {};
+  Knot::Container container;
+  EXPECT_FALSE(container.registerInstance<Dummy>(nullptr));
+
+  Dummy d;
+  EXPECT_TRUE(container.registerInstance<Dummy>(&d));
+  EXPECT_FALSE(container.registerInstance<Dummy>(&d));
 }
 
 TEST(ContainerTest, ContainerDoesNotAffectNearbyMemory) {
@@ -156,12 +218,12 @@ TEST(ContainerTest, ContainerDoesNotAffectNearbyMemory) {
 
   Knot::Container container(buffer, sizeof(buffer));
   container.registerService<Dummy>(SINGLETON);
-  Dummy *dummy = container.resolve<Dummy>();
+  Dummy* dummy = container.resolve<Dummy>();
   ASSERT_NE(dummy, nullptr);
   EXPECT_EQ(dummy->x, 123);
 
   container.registerService<Transient>(TRANSIENT);
-  Transient *t1 = container.resolve<Transient>();
+  Transient* t1 = container.resolve<Transient>();
   ASSERT_NE(t1, nullptr);
   EXPECT_EQ(t1->x, 456);
 
@@ -194,7 +256,6 @@ int DummySingleton::destructed = 0;
 int DummyTransient::destructed = 0;
 
 TEST(ContainerTest, DestructorDeletesAllSingletonsAndTransients) {
-
   int initialSingleton = DummySingleton::destructed = 0;
   int initialTransient = DummyTransient::destructed = 0;
 
@@ -202,10 +263,10 @@ TEST(ContainerTest, DestructorDeletesAllSingletonsAndTransients) {
     Knot::Container container;
     container.registerService<DummySingleton>(SINGLETON);
     container.registerService<DummyTransient>(TRANSIENT);
-    DummySingleton *s = container.resolve<DummySingleton>();
+    DummySingleton* s = container.resolve<DummySingleton>();
     (void)s;
-    DummyTransient *t1 = container.resolve<DummyTransient>();
-    DummyTransient *t2 = container.resolve<DummyTransient>();
+    DummyTransient* t1 = container.resolve<DummyTransient>();
+    DummyTransient* t2 = container.resolve<DummyTransient>();
     (void)t1;
     (void)t2;
   }

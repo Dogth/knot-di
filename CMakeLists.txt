@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(knot-di VERSION 0.1.0 LANGUAGES CXX DESCRIPTION "Knot Dependency Injection library for C++ adhering to C++03 standard")
-
+set(CMAKE_CXX_STANDARD 98)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()

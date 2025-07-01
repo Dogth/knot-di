@@ -50,4 +50,23 @@ struct RegistryEntry {
 };
 };  // namespace Knot
 
+template <typename T>
+struct AlignmentOf {
+  struct Helper {
+    char c;
+    T t;
+  };
+  enum { value = sizeof(Helper) - sizeof(T) };
+};
+// Element type helper for arrays
+template <typename T>
+struct ElementType {
+  typedef T Type;
+};
+
+template <typename T, size_t N>
+struct ElementType<T[N]> {
+  typedef T Type;
+};
+
 #endif  // TYPE_ID_HPP

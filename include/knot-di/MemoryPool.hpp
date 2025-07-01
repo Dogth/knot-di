@@ -46,12 +46,25 @@ class MemoryPool {
    *
    * @param buffer Указатель на буфер, который будет использоваться в качестве
    * пула памяти.
-   * @param buffer_size Размер буфера в байтах.
    */
-  MemoryPool(void* buffer, size_t buffer_size)
-      : _buffer(buffer),
+  template <size_t N>
+  MemoryPool(uint8_t (&buffer)[N])
+      : _buffer(buffer), _used_bytes(0), _max_bytes(N), _buffer_offset(0) {}
+
+  /** @brief Конструктор MemoryPool с указанием буфера и типа. Размер
+   * вычисляется автоматически.
+   * @details Создает пул памяти с заданным буфером и его размером, который
+   * вычисляется на основе типа T и размера массива N.
+   *
+   * @param buffer Указатель на буфер, который будет использоваться в качестве
+   * пула памяти.
+   * @tparam T Тип буфера, который должен быть массивом фиксированного размера.
+   */
+  template <typename T, size_t N>
+  MemoryPool(T (&buffer)[N])
+      : _buffer(static_cast<void*>(buffer)),
         _used_bytes(0),
-        _max_bytes(buffer_size),
+        _max_bytes(sizeof(T) * N),
         _buffer_offset(0) {}
 
   /** @brief Метод для выделения памяти из пула

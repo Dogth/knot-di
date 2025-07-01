@@ -16,7 +16,7 @@ TEST(MemoryPoolTest, AllocateAndDeallocate) {
 
 TEST(MemoryPoolTest, BufferOverflow) {
   char buffer[64];
-  Knot::MemoryPool pool(buffer, sizeof(buffer));
+  Knot::MemoryPool pool(buffer);
   void* ptr1 = pool.allocate(60, alignof(int));
   ASSERT_NE(ptr1, nullptr);
 
@@ -26,7 +26,7 @@ TEST(MemoryPoolTest, BufferOverflow) {
 
 TEST(MemoryPoolTest, Alignment) {
   char buffer[64];
-  Knot::MemoryPool pool(buffer, sizeof(buffer));
+  Knot::MemoryPool pool(buffer);
   void* ptr = pool.allocate(16, 16);
   ASSERT_NE(ptr, nullptr);
   EXPECT_EQ(reinterpret_cast<uintptr_t>(ptr) % 16, 0);
@@ -63,7 +63,7 @@ TEST(MemoryPoolTest, HeapOverflow) {
 
 TEST(MemoryPoolTest, ResetFunctionality) {
   char buffer[64];
-  Knot::MemoryPool pool(buffer, sizeof(buffer));
+  Knot::MemoryPool pool(buffer);
   void* ptr1 = pool.allocate(32, alignof(int));
   ASSERT_NE(ptr1, nullptr);
   pool.reset();
@@ -86,7 +86,7 @@ TEST(MemoryPoolTest, BufferDoesNotAffectNearbyMemory) {
   std::fill_n(before, sizeof(before), 0xAA);
   std::fill_n(after, sizeof(after), 0xBB);
 
-  Knot::MemoryPool pool(buffer, sizeof(buffer));
+  Knot::MemoryPool pool(buffer);
   void* ptr = pool.allocate(32, alignof(int));
   ASSERT_NE(ptr, nullptr);
 

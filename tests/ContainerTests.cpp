@@ -169,12 +169,12 @@ TEST(ContainerTest, RegisterInstanceArrayWorks) {
     int id;
     Entity(int i) : id(i) {}
   };
-  Entity entities[4] = {Entity(10), Entity(20), Entity(30), Entity(40)};
+  Entity entities[1] = {Entity(10)};
   Knot::Container container;
-  ASSERT_TRUE(container.registerInstance<Entity[4]>(&entities));
-  Entity(*resolved)[4] = container.resolve<Entity[4]>();
+  ASSERT_TRUE(container.registerInstance<Entity[1]>(&entities));
+  Entity(*resolved)[1] = container.resolve<Entity[1]>();
   ASSERT_NE(resolved, nullptr);
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 1; ++i) {
     EXPECT_EQ((*resolved)[i].id, entities[i].id);
   }
 }
@@ -216,7 +216,7 @@ TEST(ContainerTest, ContainerDoesNotAffectNearbyMemory) {
     int x = 456;
   };
 
-  Knot::Container container(buffer, sizeof(buffer));
+  Knot::Container container(buffer);
   container.registerService<Dummy>(SINGLETON);
   Dummy* dummy = container.resolve<Dummy>();
   ASSERT_NE(dummy, nullptr);

@@ -11,6 +11,8 @@
 #ifndef CONTAINER_HPP
 #define CONTAINER_HPP
 
+// TODO: возвращение кода ошибок
+
 #include <cstddef>
 #include <new>
 
@@ -72,7 +74,8 @@ class Container {
   template <typename T>
   bool register_singleton(IFactory* factory) {
     size_t size = sizeof(T);
-    void* mem = _pool.allocate(size, sizeof(void*));
+    void* mem =
+        _pool.allocate(size, AlignmentOf<typename ElementType<T>::Type>::value);
     if (!mem) return false;
     RegistryEntry& entry = _registry[_service_count++];
     entry.type = TypeId<T>();
@@ -190,11 +193,34 @@ class Container {
    * использовать конструктор без параметров или с указанием максимального
    * размера пула памяти.
    */
-  Container(void* buffer, size_t buffer_size)
+  template <size_t N>
+  Container(uint8_t (&buffer)[N])
       : _transient_count(0),
         _factory_count(0),
         _service_count(0),
-        _pool(buffer, buffer_size) {}
+        _pool(buffer) {}
+
+  /** @brief Конструктор контейнера с указанием буфера и его размера, а также
+   * его типа. Применяется для инициализации контейнера с фиксированным буфером
+   * и определенным выравнением.
+   * @details Создает контейнер с нулевым счетчиком сервисов и временных
+   * сервисов, а также инициализирует пул памяти с заданным буфером и его
+   * размером.
+   * @param buffer Указатель на буфер, который будет использоваться в качестве
+   * пула памяти.
+   * @tparam T Тип буфера, который должен быть массивом фиксированного размера.
+   * @param N Размер буфера в элементах.
+   *
+   * @note Если требуется использовать пул памяти без буфера, рекомендуется
+   * использовать конструктор без параметров или с указанием максимального
+   * размера пула памяти.
+   */
+  template <typename T, size_t N>
+  Container(T (&buffer)[N])
+      : _transient_count(0),
+        _factory_count(0),
+        _service_count(0),
+        _pool(buffer) {}
 
   /** @brief Деструктор контейнера
    * @details Освобождает все зарегистрированные сервисы и временные сервисы,
@@ -286,8 +312,12 @@ class Container {
       case TRANSIENT: {
         if (_transient_count >= KNOT_MAX_TRANSIENTS) return NULL;
         size_t size = 0;
-        void* mem = _pool.allocate(sizeof(T), sizeof(void*), &size);
+        void* mem = _pool.allocate(
+
+            sizeof(T), AlignmentOf<typename ElementType<T>::Type>::value,
+            &size);
         if (!mem) return NULL;
+
         T* ptr = static_cast<T*>(desc.factory->create(mem));
         _transients[_transient_count].factory = desc.factory;
         _transients[_transient_count].ptr = ptr;

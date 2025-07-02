@@ -57,25 +57,18 @@
  * @param TPS Типы параметров
  * @param ARGS Аргументы для конструктора фабрики
  *
- * @note Расширение метода регистрации из @link Container::registerService для
+ * @note Расширение метода регистрации @link registerService для
  * различного количества аргументов.
  */
 #define R_GEN(N, TMPL, FUNC, TPS, ARGS)                                   \
   template <typename T, EXPAND TMPL>                                      \
-  inline IFactory* _alloc_factory(EXPAND FUNC) {                          \
-    void* mem =                                                           \
-        _pool.allocate(sizeof(Factory##N<T, EXPAND TPS>), sizeof(void*)); \
-    if (!mem) return NULL;                                                \
-    IFactory* factory = new (mem) Factory##N<T, EXPAND TPS>(EXPAND ARGS); \
-    if (_factory_count >= KNOT_MAX_SERVICES) return NULL;                 \
-    _factories[_factory_count++] = factory;                               \
-    return factory;                                                       \
-  }                                                                       \
-                                                                          \
-  template <typename T, EXPAND TMPL>                                      \
   bool registerService(Strategy strategy, EXPAND FUNC) {                  \
-    return addService<T>(strategy,                                        \
-                         _alloc_factory<T, EXPAND TPS>(EXPAND ARGS));     \
+    void* mem = m_pool.allocate<Factory##N<T, EXPAND TPS>>();             \
+    if (!mem) return false;                                               \
+    IFactory* factory = new (mem) Factory##N<T, EXPAND TPS>(EXPAND ARGS); \
+    if (m_factory_count >= KNOT_MAX_SERVICES) return false;               \
+    m_factories[m_factory_count++] = factory;                             \
+    return addService<T>(strategy, factory);                              \
   }
 
 #define REGISTER_GEN \

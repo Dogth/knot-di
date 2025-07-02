@@ -11,8 +11,6 @@
 #ifndef CONTAINER_HPP
 #define CONTAINER_HPP
 
-// TODO: возвращение кода ошибок
-
 #include <cstddef>
 #include <new>
 
@@ -45,24 +43,24 @@ class Container {
   Container(const Container&);             // Запрет копирования контейнера
   Container& operator=(const Container&);  // Запрет присваивания контейнера
 
-  size_t _service_count;    // Количество зарегистрированных сервисов
-  size_t _factory_count;    // Количество зарегистрированных фабрик
-  size_t _transient_count;  // Количество временных сервисов
+  size_t m_service_count;    // Количество зарегистрированных сервисов
+  size_t m_factory_count;    // Количество зарегистрированных фабрик
+  size_t m_transient_count;  // Количество временных сервисов
 
-  MemoryPool _pool;  // Пул памяти для управления памятью сервисов
+  MemoryPool m_pool;  // Пул памяти для управления памятью сервисов
 
   RegistryEntry
-      _registry[KNOT_MAX_SERVICES];  // Реестр зарегистрированных сервисов
-  IFactory* _factories[KNOT_MAX_SERVICES];         // Массив фабрик для сервисов
-  TransientInfo _transients[KNOT_MAX_TRANSIENTS];  // Массив временных сервисов
+      m_registry[KNOT_MAX_SERVICES];  // Реестр зарегистрированных сервисов
+  IFactory* m_factories[KNOT_MAX_SERVICES];  // Массив фабрик для сервисов
+  TransientInfo m_transients[KNOT_MAX_TRANSIENTS];  // Массив временных сервисов
 
   /** @brief метод для поиска записи в реестре по идентификатору типа
    * @param tid Указатель на идентификатор типа
    * @return Указатель на найденную запись или nullptr, если запись не найдена
    */
   RegistryEntry* find_entry(void* tid) {
-    for (size_t i = 0; i < _service_count; ++i)
-      if (_registry[i].type == tid) return &_registry[i];
+    for (size_t i = 0; i < m_service_count; ++i)
+      if (m_registry[i].type == tid) return &m_registry[i];
     return NULL;
   }
 
@@ -74,10 +72,9 @@ class Container {
   template <typename T>
   bool register_singleton(IFactory* factory) {
     size_t size = sizeof(T);
-    void* mem =
-        _pool.allocate(size, AlignmentOf<typename ElementType<T>::Type>::value);
+    void* mem = m_pool.allocate<Factory<T>>();
     if (!mem) return false;
-    RegistryEntry& entry = _registry[_service_count++];
+    RegistryEntry& entry = m_registry[m_service_count++];
     entry.type = TypeId<T>();
     entry.desc.factory = factory;
     entry.desc.strategy = SINGLETON;
@@ -93,13 +90,43 @@ class Container {
    */
   template <typename T>
   bool register_transient(IFactory* factory) {
-    RegistryEntry& entry = _registry[_service_count++];
+    RegistryEntry& entry = m_registry[m_service_count++];
     entry.type = TypeId<T>();
     entry.desc.factory = factory;
     entry.desc.strategy = TRANSIENT;
     entry.desc.instance = NULL;
     entry.desc.storage = NULL;
     return true;
+  }
+
+  /** @brief метод для выделения фабрики для сервиса
+   * @tparam T Тип сервиса
+   * @return Указатель на созданную фабрику или NULL, если не удалось выделить
+   * память
+   */
+  template <typename T>
+  inline IFactory* alloc_factory() {
+    void* mem = m_pool.allocate<Factory<T>>();
+    if (!mem) return NULL;
+    IFactory* factory = new (mem) Factory<T>();
+    if (m_factory_count >= KNOT_MAX_SERVICES) return NULL;
+    m_factories[m_factory_count++] = factory;
+    return factory;
+  }
+
+  /** @brief метод для удаления временного сервиса по индексу
+   * @param idx Индекс временного сервиса в массиве m_transients
+   * @note Этот метод освобождает память, занятую временным сервисом, и вызывает
+   * его деструктор.
+   */
+  inline void destroyTransientAt(size_t idx) {
+    if (m_transients[idx].ptr && m_transients[idx].factory)
+      m_transients[idx].factory->destroy(m_transients[idx].ptr);
+    if (m_transients[idx].ptr)
+      m_pool.deallocate(m_transients[idx].ptr, m_transients[idx].alloc_size);
+    m_transients[idx].ptr = NULL;
+    m_transients[idx].alloc_size = 0;
+    m_transients[idx].factory = NULL;
   }
 
   /** @brief метод для добавления сервиса в контейнер
@@ -114,7 +141,7 @@ class Container {
   template <typename T>
   inline bool addService(Strategy strategy, IFactory* factory) {
     void* tid = TypeId<T>();
-    if (!factory || _service_count >= KNOT_MAX_SERVICES || find_entry(tid))
+    if (!factory || m_service_count >= KNOT_MAX_SERVICES || find_entry(tid))
       return false;
     switch (strategy) {
       case SINGLETON:
@@ -136,14 +163,14 @@ class Container {
    * ресурсов.
    */
   inline void destroyAllFactories() {
-    for (size_t i = 0; i < _factory_count; ++i) {
-      if (_factories[i]) {
-        _factories[i]->destroy(_factories[i]);
-        _pool.deallocate(_factories[i], sizeof(IFactory*));
-        _factories[i] = NULL;
+    for (size_t i = 0; i < m_factory_count; ++i) {
+      if (m_factories[i]) {
+        m_factories[i]->destroy(m_factories[i]);
+        m_pool.deallocate(m_factories[i], sizeof(IFactory*));
+        m_factories[i] = NULL;
       }
     }
-    _factory_count = 0;
+    m_factory_count = 0;
   }
 
  public:
@@ -158,10 +185,10 @@ class Container {
    * все выделения будут происходить в динамической памяти.
    */
   Container()
-      : _transient_count(0),
-        _factory_count(0),
-        _service_count(0),
-        _pool(4096) {}
+      : m_transient_count(0),
+        m_factory_count(0),
+        m_service_count(0),
+        m_pool(4096) {}
 
   /** @brief Конструктор контейнера с указанием максимального размера пула
    * памяти
@@ -175,11 +202,11 @@ class Container {
    * @warning Этот конструктор не принимает буфер для пула памяти, поэтому
    * все выделения будут происходить в динамической памяти.
    */
-  explicit Container(size_t max_bytes)
-      : _transient_count(0),
-        _factory_count(0),
-        _service_count(0),
-        _pool(max_bytes) {}
+  Container(size_t max_bytes)
+      : m_transient_count(0),
+        m_factory_count(0),
+        m_service_count(0),
+        m_pool(max_bytes) {}
 
   /** @brief Конструктор контейнера с указанием буфера и его размера
    * @details Создает контейнер с нулевым счетчиком сервисов и временных
@@ -195,10 +222,10 @@ class Container {
    */
   template <size_t N>
   Container(uint8_t (&buffer)[N])
-      : _transient_count(0),
-        _factory_count(0),
-        _service_count(0),
-        _pool(buffer) {}
+      : m_transient_count(0),
+        m_factory_count(0),
+        m_service_count(0),
+        m_pool(buffer) {}
 
   /** @brief Конструктор контейнера с указанием буфера и его размера, а также
    * его типа. Применяется для инициализации контейнера с фиксированным буфером
@@ -217,10 +244,10 @@ class Container {
    */
   template <typename T, size_t N>
   Container(T (&buffer)[N])
-      : _transient_count(0),
-        _factory_count(0),
-        _service_count(0),
-        _pool(buffer) {}
+      : m_transient_count(0),
+        m_factory_count(0),
+        m_service_count(0),
+        m_pool(buffer) {}
 
   /** @brief Деструктор контейнера
    * @details Освобождает все зарегистрированные сервисы и временные сервисы,
@@ -231,16 +258,6 @@ class Container {
     destroyAllSingletons();
     destroyAllTransients();
     destroyAllFactories();
-  }
-
-  template <typename T>
-  inline IFactory* _alloc_factory() {
-    void* mem = _pool.allocate(sizeof(Factory<T>), sizeof(Factory<T>*));
-    if (!mem) return NULL;
-    IFactory* factory = new (mem) Factory<T>();
-    if (_factory_count >= KNOT_MAX_SERVICES) return NULL;
-    _factories[_factory_count++] = factory;
-    return factory;
   }
 
   /** @brief Регистрация сервиса в контейнере
@@ -257,7 +274,7 @@ class Container {
    */
   template <typename T>
   bool registerService(Strategy strategy = SINGLETON) {
-    return addService<T>(strategy, _alloc_factory<T>());
+    return addService<T>(strategy, alloc_factory<T>());
   }
 
   /** @brief Регистрация экземпляра сервиса в контейнере
@@ -273,10 +290,10 @@ class Container {
    */
   template <typename T>
   bool registerInstance(T* instance) {
-    if (!instance || _service_count >= KNOT_MAX_SERVICES) return false;
+    if (!instance || m_service_count >= KNOT_MAX_SERVICES) return false;
     void* tid = TypeId<T>();
     if (find_entry(tid)) return false;
-    RegistryEntry& entry = _registry[_service_count++];
+    RegistryEntry& entry = m_registry[m_service_count++];
     entry.type = tid;
     entry.desc.factory = NULL;
     entry.desc.strategy = EXTERNAL;
@@ -310,19 +327,14 @@ class Container {
         return static_cast<T*>(desc.instance);
       }
       case TRANSIENT: {
-        if (_transient_count >= KNOT_MAX_TRANSIENTS) return NULL;
-        size_t size = 0;
-        void* mem = _pool.allocate(
-
-            sizeof(T), AlignmentOf<typename ElementType<T>::Type>::value,
-            &size);
+        if (m_transient_count >= KNOT_MAX_TRANSIENTS) return NULL;
+        void* mem = m_pool.allocate<T>();
         if (!mem) return NULL;
-
         T* ptr = static_cast<T*>(desc.factory->create(mem));
-        _transients[_transient_count].factory = desc.factory;
-        _transients[_transient_count].ptr = ptr;
-        _transients[_transient_count].alloc_size = size;
-        ++_transient_count;
+        m_transients[m_transient_count].factory = desc.factory;
+        m_transients[m_transient_count].ptr = ptr;
+        m_transients[m_transient_count].alloc_size = sizeof(T);
+        ++m_transient_count;
         return ptr;
       }
       case EXTERNAL: {
@@ -339,13 +351,13 @@ class Container {
    * вызывает их деструкторы.
    */
   void destroyAllSingletons() {
-    for (size_t i = 0; i < _service_count; ++i) {
-      Descriptor& desc = _registry[i].desc;
+    for (size_t i = 0; i < m_service_count; ++i) {
+      Descriptor& desc = m_registry[i].desc;
       if (desc.strategy == SINGLETON && desc.instance) {
         size_t alloc_size = sizeof(desc.instance);
         desc.factory->destroy(desc.instance);
         if (desc.storage) {
-          _pool.deallocate(desc.storage, alloc_size);
+          m_pool.deallocate(desc.storage, alloc_size);
           desc.storage = NULL;
         }
         desc.instance = NULL;
@@ -353,25 +365,15 @@ class Container {
     }
   }
 
-  inline void _destroyTransientAt(size_t idx) {
-    if (_transients[idx].ptr && _transients[idx].factory)
-      _transients[idx].factory->destroy(_transients[idx].ptr);
-    if (_transients[idx].ptr)
-      _pool.deallocate(_transients[idx].ptr, _transients[idx].alloc_size);
-    _transients[idx].ptr = NULL;
-    _transients[idx].alloc_size = 0;
-    _transients[idx].factory = NULL;
-  }
-
   /** @brief Уничтожение всех временных сервисов
    * @note Этот метод освобождает память, занятую всеми временными сервисами,
    * и вызывает их деструкторы.
    */
   void destroyAllTransients() {
-    for (size_t i = 0; i < _transient_count; ++i) {
-      _destroyTransientAt(i);
+    for (size_t i = 0; i < m_transient_count; ++i) {
+      destroyTransientAt(i);
     }
-    _transient_count = 0;
+    m_transient_count = 0;
   }
 
   /** @brief Уничтожение временного сервиса по указателю
@@ -387,11 +389,11 @@ class Container {
    */
   template <typename T>
   void destroyTransient(T* ptr) {
-    for (size_t idx = 0; idx < _transient_count; idx++) {
-      if (_transients[idx].ptr == ptr) {
-        _destroyTransientAt(idx);
-        _transients[idx] = _transients[_transient_count - 1];
-        _transient_count--;
+    for (size_t idx = 0; idx < m_transient_count; idx++) {
+      if (m_transients[idx].ptr == ptr) {
+        destroyTransientAt(idx);
+        m_transients[idx] = m_transients[m_transient_count - 1];
+        m_transient_count--;
         break;
       }
     }

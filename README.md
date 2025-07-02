@@ -1,105 +1,84 @@
-# Knot-DI 🪢
+# Knot-DI
 
-Библиотека для инъекции зависимостей на C++ нацеленная на встраиваемые системы
+**Knot-DI** is a lightweight, header-only Dependency Injection (DI) library for C++03.  
+It is designed for embedded, legacy, or resource-constrained environments where modern C++ features are unavailable.
 
-## Возможности
+## Features
 
-- Регистрация и разрешение зависимостей по типу
-- Поддержка singleton и transient сервисов
-- Простое API для внедрения зависимостей в классы
-- Минимальные внешние зависимости
-- Контроль памяти
+- **Header-only:** No linking required, just include the headers.
+- **C++03 compatible:** Works on old toolchains.
+- **Singleton and Transient lifetimes**
+- **Custom memory pool support**
+- **Macro-based service registration for multiple constructor arities**
 
-## Пример использования
+## Getting Started
+
+### Requirements
+
+- C++03-compatible compiler (e.g., GCC, Clang)
+- CMake ≥ 3.10
+- [Optional] lcov/genhtml for coverage, clang-format for formatting, Doxygen for docs
+
+### Build & Test
+
+```sh
+# Clone and enter the repo
+git clone <repo-url>
+cd knot-di
+
+# Build and run tests
+cmake -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+cd build
+ctest --output-on-failure
+```
+
+### Code Coverage
+
+```sh
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=ON
+cmake --build build
+cd build
+ctest
+make coverage  # Generates coverage-report/ with HTML
+```
+
+### Formatting
+
+```sh
+cmake --build build --target format
+```
+
+### Documentation
+
+```sh
+cmake --build build --target doc
+```
+
+## Usage
+
+Include the main header in your project:
 
 ```cpp
-Container container;
-
-container.register<IMyService>();
-container.register<IRepository>(TRANSIENT, "repository");
-
-IMyService *service = container.resolve<IMyService>();
-IRepository *repository = container.resolve<IRepository>();
-
+#include <knot-di/Container.hpp>
 ```
 
-## Диаграмма классов
+Register and resolve services:
 
-```mermaid
-classDiagram
-class Container {
--size_t \_service_count
--size_t \_factory_count
--size_t \_transient_count
--MemoryPool \_pool
--RegistryEntry \_registry[KNOT_MAX_SERVICES]
--IFactory* \_factories[KNOT_MAX_SERVICES]
--TransientInfo \_transients[KNOT_MAX_TRANSIENTS]
-+Container()
-+Container(size_t max_bytes)
-+Container(void* buffer, size_t buffer_size)
-+~Container()
-+registerService<T>(Strategy)
-+resolve<T>()
-+destroyAllSingletons()
-+destroyAllTransients()
-+destroyTransient<T>(T\*)
-}
-
-    class RegistryEntry {
-        +void* type
-        +Descriptor desc
-    }
-
-    class Descriptor {
-        +IFactory* factory
-        +Strategy strategy
-        +void* instance
-        +void* storage
-    }
-
-    class IFactory {
-        <<interface>>
-        +~IFactory()
-        +create(void* buffer)
-        +destroy(void* instance)
-    }
-
-    class Factory~T~ {
-        +create(void* buffer)
-        +destroy(void* instance)
-    }
-
-    class TransientInfo {
-        +void* ptr
-        +IFactory* factory
-        +size_t alloc_size
-    }
-
-    class MemoryPool {
-        +MemoryPool(size_t)
-        +MemoryPool(void*, size_t)
-        +void* allocate(size_t, size_t, size_t* = nullptr)
-        +void deallocate(void*, size_t)
-        +void reset()
-        +size_t getUsedBytes()
-        +size_t getMaxBytes()
-        +size_t getBufferOffset()
-    }
-
-    class Strategy {
-        <<enum>>
-        SINGLETON
-        TRANSIENT
-    }
-
-    Container "1" o-- "*" RegistryEntry
-    RegistryEntry "1" o-- "1" Descriptor
-    Descriptor "1" o-- "1" Strategy
-    Descriptor "1" o-- "1" IFactory
-    Container "1" o-- "*" IFactory
-    Container "1" o-- "*" TransientInfo
-    Container "1" o-- "1" MemoryPool
-    TransientInfo "1" o-- "1" IFactory
-    Factory~T~ --|> IFactory
+```cpp
+Knot::Container container;
+container.registerService<MyType>(SINGLETON);
+MyType* instance = container.resolve<MyType>();
 ```
+
+See `tests/ContainerTests.cpp` for more usage examples.
+
+## Development Environment (Nix)
+
+If you use [Nix](https://nixos.org):
+
+```sh
+nix develop
+```
+
+This provides all dependencies for building, testing, formatting, and coverage.

@@ -31,7 +31,13 @@
                 "c++"
               ];
             };
-
+            gtest = {
+              enable = false;
+              name = "gtest-check";
+              types = [ "c++" ];
+              entry = "cmake --build build --target test";
+              stages = [ "pre-commit" ];
+            };
             # Spelling and grammar checks
             typos = {
               enable = false;
